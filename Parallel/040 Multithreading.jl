@@ -218,51 +218,19 @@ function threadedpi(n)
     end
     return 4 * sum(inside) / n
 end
-threadedpi(240)
+threadedpi(12)
 @time threadedpi(100_000_000)
 
-# Ok, now why didn't that work?  It's slow! Let's look at the sequence of random
-# numbers that we generate:
+# Ok, now why didn't that work?  It's slow!
+
 
 import Random
-Random.seed!(0)
-N = 20000
-Rserial = zeros(N)
-for i in 1:N
-    Rserial[i] = rand()
-end
-Rserial
-
-#%%
-
-Random.seed!(0)
-Rthreaded = zeros(N)
-@threads for i in 1:N
-    Rthreaded[i] = rand()
-end
-Rthreaded
-
-#%%
-
-Set(Rserial) == Set(Rthreaded)
-
-# Aha, `rand()` isn't (currently) threadsafe! It's mutating (and reading) some global each
-# time to figure out what to get next. This leads to slowdowns — and worse — it
-# skews the generated distribution of random numbers since some are repeated!!
-#
-# Note: on the upcoming Julia 1.3 it is now threadsafe by default! Here's how
-# we can emulate it on prior versions:
-
-const ThreadRNG = Vector{Random.MersenneTwister}(undef, nthreads())
-@threads for i in 1:nthreads()
-    ThreadRNG[Threads.threadid()] = Random.MersenneTwister()
-end
 function threadedpi2(n)
     inside = zeros(Int, nthreads())
     len, rem = divrem(n, nthreads())
     rem == 0 || error("use a multiple of $(nthreads()), please!")
     @threads for i in 1:nthreads()
-        rng = ThreadRNG[threadid()]
+        rng = Random.THREAD_RNGs[threadid()]
         v = 0
         for j in 1:len
             x, y = rand(rng), rand(rng)
@@ -354,26 +322,17 @@ function test(spacing)
     end
     a, calls
 end
-@benchmark test(1);
-@benchmark test(8);
-
-#%%
-
-# ## Further improvements coming here!
-#
-# PARTR — the threading improvement I discussed at the beginning aims to address
-# this problem of having library functions implemented with `@threads` and then
-# having callers call them with `@threads`. Uses a state-of-the-art work queue
-# mechanism to make sure that all threads stay busy.
+@benchmark test(1)
+@benchmark test(8)
 
 #%%
 
 # # Threading takeaways:
 #
 # * It's easy! Just start Julia with `JULIA_NUM_THREADS` and tack a `@threads` on your loop
-# * Well, not so fast
-#     * Be aware of your hardware to set `JULIA_NUM_THREADS` appropiately
+# * Well, not so fast:
+#     * Be aware of your hardware to set `JULIA_NUM_THREADS` or `-t` appropiately
 #     * Beware shared state (for both performance and correctness)
-#     * Beware global state (but the built-in global state is improving!)
+#     * Beware global state (but standard library — including rand() — is threadsafe, but might be slow)
 #     * Beware false sharing (especially with multiple processor chips)
 # * We need to think carefully about how to design parallel algorithms!

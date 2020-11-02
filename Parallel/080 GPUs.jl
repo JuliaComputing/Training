@@ -54,10 +54,11 @@ imgs = MNIST.images()
 labels = onehotbatch(MNIST.labels(), 0:9)
 
 ## Partition into batches of size 32
-train = [(cat(float.(imgs[i])..., dims = 4), labels[:,i])
-         for i in partition(1:60_000, 32)]
+preprocess(img) = reshape(Float32.(img), size(img)..., 1)
+train = [(Flux.batch(preprocess.(imgs[i])), labels[:,i])
+         for i in partition(eachindex(imgs), 128)]
 ## Prepare test set (first 1,000 images)
-tX = cat(float.(MNIST.images(:test)[1:1000])..., dims = 4)
+tX = Flux.batch(preprocess.(MNIST.images(:test)[1:1000]))
 tY = onehotbatch(MNIST.labels(:test)[1:1000], 0:9)
 
 m = Chain(
@@ -73,12 +74,11 @@ m = Chain(
 loss(x, y) = crossentropy(m(x), y)
 accuracy(x, y) = mean(onecold(m(x)) .== onecold(y))
 opt = ADAM()
-Flux.train!(loss, train[1:1], opt, cb = () -> @show(accuracy(tX, tY)))
+Flux.train!(loss, Flux.params(m), train[1:1], opt, cb = () -> @show(accuracy(tX, tY)))
 @time Flux.train!(loss, Flux.params(m), train[1:10], opt, cb = () -> @show(accuracy(tX, tY)))
 
 # Now let's re-do it on a GPU. "All" it takes is moving the data there with `gpu`!
-
-include(datapath("scripts/fixupCUDNN.jl")) # JuliaBox uses an old version of CuArrays; this backports a fix for it
+using CUDA
 gputrain = gpu.(train[1:10])
 gpum = gpu(m)
 gputX = gpu(tX)
@@ -92,7 +92,7 @@ Flux.train!(gpuloss, Flux.params(gpum), gpu.(train[1:1]), gpuopt, cb = () -> @sh
 # ## Defining your own GPU kernels
 #
 # So that's leveraging Flux's ability to work with GPU arrays — which is magical
-# and awesome — but you don't always have a library to lean on like that.
+# and awesome — but you don't always have a library to lean on like that.
 # How might you define your own GPU kernel?
 #
 # Recall the monte carlo pi example:
@@ -107,18 +107,18 @@ function serialpi(n)
 end
 
 # How could we express this on the GPU?
-
-using CuArrays.CURAND
+import CUDA: CURAND
 function findpi_gpu(n)
-    4 * sum(curand(Float64, n).^2 .+ curand(Float64, n).^2 .<= 1) / n
+    4 * sum(rand(CURAND.default_rng(), Float64, n).^2 .+ rand(CURAND.default_rng(), Float64, n).^2 .<= 1) / n
 end
 findpi_gpu(10_000_000)
 
 #%%
 
 using BenchmarkTools
-@btime findpi_gpu(10_000_000)
-@btime serialpi(10_000_000)
+@time serialpi(10_000_000)
+@time findpi_gpu(10_000_000)
+
 
 # That leans on broadcast to build the GPU kernel — and is creating three arrays
 # in the process — but it's still much faster than our serial pi from before.

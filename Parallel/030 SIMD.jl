@@ -10,37 +10,21 @@
 #
 # Instead of computing four sums sequentially:
 #
-# \begin{align}
-# x_1 + y_1 &\rightarrow z_1 \\
-# x_2 + y_2 &\rightarrow z_2 \\
-# x_3 + y_3 &\rightarrow z_3 \\
-# x_4 + y_4 &\rightarrow z_4
-# \end{align}
+# x₁ + y₁ = z₁
+# x₂ + y₂ = z₂
+# x₃ + y₃ = z₃
+# x₄ + y₄ = z₄
 #
 # Modern processors have vector processing units that can do it all at once:
 #
-# $$
-# \left(\begin{array}{cc}
-# x_1 \\
-# x_2 \\
-# x_3 \\
-# x_4
-# \end{array}\right)
-# +
-# \left(\begin{array}{cc}
-# y_1 \\
-# y_2 \\
-# y_3 \\
-# y_4
-# \end{array}\right)
-# \rightarrow
-# \left(\begin{array}{cc}
-# z_1 \\
-# z_2 \\
-# z_3 \\
-# z_4
-# \end{array}\right)
-# $$
+# ┌  ┐   ┌  ┐   ┌  ┐
+# │x₁│   │y₁│   │z₁│
+# │x₂│ + │y₂│ = │z₂│
+# │x₃│   │y₃│   │z₃│
+# │x₄│   │y₄│   │z₄│
+# └  ┘   └  ┘   └  ┘
+#
+# The magic is that the vector + _takes the same amount of time_ as a single scalar +
 
 #%%
 
@@ -145,7 +129,7 @@ B32 = rand(Int32(1):Int32(10), length(B)*2)
 
 # How can we see if something is getting vectorized?
 
-@code_llvm simdsum(A32)
+@code_llvm debuginfo=:none simdsum(B)
 
 # So what are the challenges?
 #
@@ -190,7 +174,7 @@ Bcopy = copy(B)
 
 # What happened?
 
-@code_llvm diff!(A, B)
+@code_llvm debuginfo=:none diff!(A, B)
 
 # We can manually assert that arrays don't alias (or have any loop-dependencies),
 # with the very special `@simd ivdep` flag, but this can be disastrous:

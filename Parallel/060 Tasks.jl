@@ -140,6 +140,19 @@ wait(t)
 
 fetch(t)
 
+# # A return to multithreading
+#
+# Tasks give the appearance of parallelism — and clearly denote areas that can be run
+# out-of-order. The exact same infrastucture can apply to true multithreading; in fact,
+# that's precisely how multithreading is built. Swap out `@async` for Threads.@spawn and
+# try the above example again:
+
+@time @sync for i in 1:10
+    Threads.@spawn work(100_000_000)
+end
+
+# The above is essentially the same as a `@threads for` loop!
+
 # # Key takeaways
 #
 # There is a lot more to tasks, but they form the foundation for reasoning about
@@ -150,3 +163,5 @@ fetch(t)
 # * `@sync` waits for them to all complete
 # * We can reason about something that runs asynchronously and may return a value
 #   at some point in the future with `fetch`. Or we can just `wait` for it.
+# * `Threads.@spawn` is _exactly_ the same — but allows tasks to move between threads for 
+#   real parallelism

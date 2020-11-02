@@ -41,6 +41,8 @@ findclosest(data, 0.5)
 
 @benchmark findclosest($data, $0.5)
 
+#%%
+
 # ### Profile!
 
 using Profile

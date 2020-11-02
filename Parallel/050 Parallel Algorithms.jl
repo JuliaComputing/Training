@@ -64,6 +64,9 @@ n= 40 # Try changing n to pick different values (try between 0-100)
 # which appears to be an intrinsically serial process. As written with a `+`
 # operator, this is `cumsum` — but note that it can generalize to any operation.
 
+cumsum(1:8)
+
+
 function prefix_serial!(⊕, y)
     for i=2:length(y)
         y[i] = y[i-1] ⊕ y[i]

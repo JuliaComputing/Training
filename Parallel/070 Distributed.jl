@@ -302,7 +302,7 @@ A = DArray((24,24)) do I
     fill(myid(), length.(I))
 end
 
-# Notice that none of the array actually lives on processor 1, but we can still
+# Notice that none of the array actually lives on process 1, but we can still
 # display the contents — when we do we're requesting all workers give us their
 # current data! While we've only talked about master-worker communcation so far,
 # workers can communicate directly amongst themselves, too (by default).
@@ -329,7 +329,7 @@ function life_step(d::DArray)
         right = mod1( last(I[2])+1,size(d,2))
         # Create a new, temporary array that holds the local part + outside edge
         old = Array{Bool}(undef, length(I[1])+2, length(I[2])+2)
-        # These accesses will pull data from other processors
+        # These accesses will pull data from other processes
         old[1      , 1      ] = d[top , left]
         old[2:end-1, 1      ] = d[I[1], left]   # left side (and corners)
         old[end    , 1      ] = d[bot , left]
