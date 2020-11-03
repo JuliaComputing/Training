@@ -15,7 +15,7 @@
 #     - C (hand-written)
 #     - C (hand-written with -ffast-math)
 #     - python (built-in)
-#     - python (numpy)
+#     - python (NumPy)
 #     - python (hand-written)
 #     - Julia (built-in)
 #     - Julia (hand-written)
@@ -67,6 +67,9 @@ sum(a)
 
 using BenchmarkTools
 
+@btime sum(a)
+@btime sum($a)
+
 # #  1. The C language
 #
 # C is often considered the gold standard: difficult on the human, nice for the machine. Getting within a factor of 2 of C is often satisfying. Nonetheless, even within C, there are many kinds of optimizations possible that a naive C writer may or may not get the advantage of.
@@ -86,7 +89,6 @@ double c_sum(size_t n, double *X) {
 """
 
 const Clib = tempname()   # make a temporary file
-
 
 ## compile to a shared library by piping C_code to gcc
 ## (works only if you have gcc installed):
@@ -112,7 +114,7 @@ c_sum(a) - sum(a)
 
 #-
 
-≈  # alias for the `isapprox` function
+≈ # alias for the `isapprox` function
 
 #-
 
@@ -200,11 +202,11 @@ py_list_bench = @benchmark $pysum($a)
 d["Python built-in"] = minimum(py_list_bench.times) / 1e6
 d
 
-# # 4. Python: `numpy`
+# # 4. Python: `NumPy`
 #
 # ## Takes advantage of hardware "SIMD", but only works when it works.
 #
-# `numpy` is an optimized C library, callable from Python.
+# `NumPy` is an optimized C library, callable from Python.
 # It may be installed within Julia as follows:
 
 ## using Pkg; Pkg.add("Conda")
@@ -216,7 +218,7 @@ using Conda
 
 #-
 
-numpy_sum = pyimport("numpy")["sum"]
+numpy_sum = pyimport("numpy").sum
 
 py_numpy_bench = @benchmark $numpy_sum($a)
 
@@ -230,7 +232,7 @@ numpy_sum(a) ≈ sum(a)
 
 #-
 
-d["Python numpy"] = minimum(py_numpy_bench.times) / 1e6
+d["Python NumPy"] = minimum(py_numpy_bench.times) / 1e6
 d
 
 # # 5. Python, hand-written
@@ -296,7 +298,7 @@ j_bench_hand = @benchmark mysum($a)
 d["Julia hand-written"] = minimum(j_bench_hand.times) / 1e6
 d
 
-# # 8. Julia (hand-written w. simd)
+# # 8. Julia (hand-written w. SIMD)
 
 function mysum_simd(A)
     s = 0.0 # s = zero(eltype(A))
@@ -316,11 +318,11 @@ mysum_simd(a)
 
 #-
 
-d["Julia hand-written simd"] = minimum(j_bench_hand_simd.times) / 1e6
+d["Julia hand-written SIMD"] = minimum(j_bench_hand_simd.times) / 1e6
 d
 
 # # Summary
 
 for (key, value) in sort(collect(d), by=last)
-    println(rpad(key, 25, "."), lpad(round(value; digits=1), 6, "."))
+    println(rpad("$key ", 25, "⋅"), lpad(" $(round(value; digits=1))", 8, "⋅"))
 end
