@@ -36,7 +36,7 @@ Roman(4)
 
 #-
 
-typeof.([5 5.0 Roman(5) "Five" '5'  5//1])
+map(typeof, [5 5.0 Roman(5) "Five" '5'  5//1])
 
 # We would like to display it nicely, in Roman numerals:
 
@@ -94,11 +94,11 @@ end
 
 #-
 
-mytimes(4,Roman(3)) # Twelve happys
+mytimes(4, Roman(3)) # Twelve happys
 
 #-
 
-mytimes(Roman(4),3) # 4x3 matrix with ones
+mytimes(Roman(4), 3) # 4x3 matrix with ones
 
 # The simplest thing to do is to explicitly define multiplication of a `Roman` by a number. We can do it as we see fit:
 

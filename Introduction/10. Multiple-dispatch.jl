@@ -269,21 +269,21 @@ end
 
 #-
 
-allkw(a=1,b=2,c=3)
+allkw(a=1, b=2, c=3)
 
 # Just like iterators can be splatted as positional arguments, dict-like collections and named tuples can be splatted as keyword arguments.
 
-function rect(;width=1,height=1,fill="#")
+function rect(; width=1, height=1, fill="#")
     for i in 1:height
         println(fill^width)
     end
 end
 
-rect(width=3,height=2,fill='o')
+rect(width=3, height=2, fill='o')
 
 #-
 
-params = (width=8,height=3,fill='A')
+params = (width=8, height=3, fill='A')
 
 #-
 
