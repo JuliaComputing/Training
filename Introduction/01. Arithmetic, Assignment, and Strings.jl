@@ -124,6 +124,7 @@ x > 0 || error("x must be positive")
 
 .1 + .2 ≈ .3 # \approx + TAB
 isapprox(.1 + .2, .3)
+
 # Comparisons "chain"
 #
 # Try inserting parentheses around one of these comparisons
@@ -189,6 +190,7 @@ x₀ = 1
 χ² = 2
 χ²
 χ²
+
 #-
 
 5ϵ # Juxtaposition is multiplication
@@ -196,9 +198,9 @@ x₀ = 1
 #-
 
 # We make use of juxtaposition for complex numbers
+
 2*im
 (1 + 2im)^2
-
 
 # ## Updating operators
 #
@@ -206,17 +208,12 @@ x₀ = 1
 
 y = 0
 y += 1
-
 y = y + 1
 
-y += 1.5
-#-
-
-## This is exactly the same as:
-y = y + 1
-
+# This is exactly the same!
 # Note that it's just re-purposing the _same name_ for a new value. This means that the type might even change:
 
+y += 1.5
 y /= 2
 
 # # Strings
@@ -238,13 +235,13 @@ s2 = """I am also" a string. """
 #-
 
                 println("""The other nice thing about triple-quoted
-                            string literals is that they ignore leading
-                            indentation, which is nice for long strings
-                            in real code. Try changing these quotes!""")
+                           string literals is that they ignore leading
+                           indentation, which is nice for long strings
+                           in real code. Try changing these quotes!""")
 
 # Strings are not written with single `'`s — that's used for a single character:
+
 'this is my string'
-first(s1)
 
 #-
 
@@ -253,6 +250,8 @@ first(s1)
 #-
 
 'If you try writing a string in single-quotes, you will get an error'
+
+'\u2200'
 
 # ## String interpolation
 
@@ -269,11 +268,3 @@ println("I have $num_fingers fingers and $num_toes toes.")
 #-
 
 println("That is $(num_fingers + num_toes) digits in all!!")
-
-
-π₀ = .45
-pi0 = .45
-pi0
-
-F = 3
-F²
