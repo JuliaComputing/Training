@@ -76,4 +76,4 @@ Pkg.status()
 
 Pkg.add("PkgTemplates")
 
-# Now use the generate_interactive() function at the REPL to create your new package
+# Now use the generate(name) function at the REPL to create your new package
