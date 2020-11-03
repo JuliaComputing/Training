@@ -14,11 +14,11 @@
 #
 # # Getting these materials:
 #
-# These materials are hosted on GitHub at https://github.com/JuliaComputing/IntroductionTraining
+# These materials are hosted on GitHub at https://github.com/JuliaComputing/Training
 #
 # To download these materials, you can either:
 #
-#   - Download the zipped directory: https://github.com/JuliaComputing/IntroductionTraining/archive/master.zip
+#   - Download the zipped directory: https://github.com/JuliaComputing/Training/archive/master.zip
 #   - Use git to _clone_ the repository
 #       (I only recommend this if you are already familiar with git)
 
