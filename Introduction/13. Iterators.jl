@@ -86,11 +86,11 @@ string(I...)
 
 collect(1/n for n in 1:10)
 
-collect( (2i,j,k) for i = 1:3, j = 1:3 for k = 1:j if i==k)
+collect( (2i,j,k) for i in 1:3, j in 1:3 for k in 1:j if i == k)
 
 collect(2)
 
-change(x) = ( (p,n÷5,d÷10,q÷25) for q = 0:25:x for d = 0:10:x-q for n = 0:5:x-q-d for p = x-q-d-n )
+change(x) = ( (p,n÷5,d÷10,q÷25) for q in 0:25:x for d in 0:10:x-q for n in 0:5:x-q-d for p in x-q-d-n )
 
 collect(change(200))
 
@@ -130,10 +130,8 @@ struct Fibs
     N::Int
 end
 
-function Base.iterate(i::Fibs, state = (0, 1, 1))
-    prev_num, current_num, n = state
-    n > i.N && return nothing
-    return (prev_num, (current_num, prev_num + current_num, n+1))
+function Base.iterate(i::Fibs, state)
+    # your code here
 end
 
 Base.length(i::Fibs) = i.N
