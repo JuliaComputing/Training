@@ -62,7 +62,7 @@ struct Point
     y::Float64
 end
 
-p=Point(1,2)
+p = Point(1,2)
 
 #-
 
@@ -84,11 +84,10 @@ x = Point(1,2)
 # ### Abstract types
 
 abstract type PointLike
-# must have field x
 end
 
 struct Point2 <: PointLike
-    z::Float64
+    x::Float64
     y::Float64
 end
 
@@ -218,47 +217,15 @@ x()
 GenericPoint() = 2
 GenericPoint()
 
-# ## Example: `OneHotVector`
-#
-# Often used in machine learning, a "one hot" vector is a vector of all zeros,
-# except for a single `1` entry.
-# Representing it as a standard vector is memory-inefficient, so it cries out
-# for a special implementation.
-
-AbstractVector = AbstractArray{T,1} where T
-
-struct OneHotVector{T<:Number} <: AbstractVector{T}
-    idx::Int
-    len::Int
-end
-
-v = OneHotVector(2, 5)
-
-Base.size(v::OneHotVector) = (v.len,)
-
-function Base.getindex(v::OneHotVector{T}, i::Integer) where {T}
-    T(i == v.idx)
-end
-
-OneHotVector{Complex{Int}}(3, 10)
-
-A = rand(5,5)
-
-A * OneHotVector(3, 5)
-
-# ### Exercise: make it generic over element type
-
 # ## Tuple types
 #
-# Tuples are very much like structs, but their types a bit special.
+# Tuples are very much like structs, but their types are a bit special.
 # 1. They have fields, but no names, only indices.
 # 2. They are always immutable.
 # 3. They can have an arbitrary number of parameters/fields.
 # 4. They are *covariant*.
 
-t = ("a", "b")
-typeof(t)
-typeof((1,2,"",4,5))
+typeof((1, 2, "", 4, 5))
 # Field access is syntax for calls to `getfield` and `setfield!`
 
 getfield(t, 2)
@@ -274,6 +241,22 @@ Tuple{String} <: Tuple{Any}
 
 # Remember: not true for `Vector{String} <: Vector{Any}`!
 
+# ## Union types
+
+1 isa Union{Int,Float64}
+1.0 isa Union{Int,Float64}
+
+# This is often used to created expanded or "lifted" domains, e.g. adding
+# a missing value to a numeric or other datatype:
+
+[1, 2, missing, 3]
+
+# An empty Union gives the empty, or "bottom" type
+
+Union{}
+
+# `x isa Union{}` is false for all values.
+
 # ## Summary of kinds of types
 #
 # 1. Concrete types: struct, mutable struct, tuple, primitive
@@ -281,10 +264,6 @@ Tuple{String} <: Tuple{Any}
 # 3. UnionAll types, `Array{T} where T`
 # 4. Union types, `Union{Int, Missing}`
 # 5. The empty, or "bottom" type `Union{}`
-
-[1,2,missing,3]
-
-Union{}[]
 
 # ## The types of functions
 #

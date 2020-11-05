@@ -2,7 +2,8 @@
 
 #-
 
-# In this notebook we'll explore **multiple dispatch**, which is a key feature of Julia.
+# In this notebook we'll explore **multiple dispatch**, which is the main organizing
+# principle of Julia.
 #
 # Multiple dispatch makes software *generic* and *fast*!
 #

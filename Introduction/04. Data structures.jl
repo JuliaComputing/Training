@@ -31,7 +31,7 @@ myfavoriteanimals[1]
 
 myfavoriteanimals[1] = "otters"
 
-# ## Now in 1.0: NamedTuples
+# ## NamedTuples
 #
 # As you might guess, `NamedTuple`s are just like `Tuple`s except that each element additionally has a name! They have a special syntax using `=` inside a tuple:
 #
@@ -88,6 +88,16 @@ myphonebook[1]
 # In the example above, `julia` thinks you're trying to access a value associated with the key `1`.
 
 #-
+
+# ## Typed dictionaries
+
+days_in_month = Dict{String,Int}("January"=>31, "February"=>28, "March"=>31, "April"=>30)
+
+# As in arrays, values are converted on assignment:
+
+days_in_month["May"] = 31.0
+
+days_in_month
 
 # ### Exercises
 
