@@ -33,6 +33,9 @@
 #-
 
 101 % 3 # remainder (modulus)
+mod(101, 3)
+101 % -3
+mod(101, -3)
 
 #-
 
@@ -42,6 +45,7 @@ sqrt(2) # square root
 
 √2 # Unicode to the rescue: \sqrt + TAB
 √42
+√5
 
 # Note that dividing two integers yields a floating point number. There are two additional operators that may be helpful here:
 
@@ -99,10 +103,13 @@ false || true # OR
 
 x = -42
 x > 0 || error("x must be positive")
+x < 0 && error("x is negative")
 
 # ### Comparisons
 
 1 == 1.0 == 1//1 # Equality
+1 <= 2 < 3
+2 < 1
 
 #-
 
@@ -226,7 +233,7 @@ s2 = """I am also" a string. """
 
 #-
 
-"""Here, we get an "error" because it's ambiguous where this string ends """
+"""Here, we get an "error" because it's ambiguous where this string ends"""
 
 #-
 
@@ -246,6 +253,7 @@ s2 = """I am also" a string. """
 #-
 
 '⊂'
+s1[1]
 
 #-
 
@@ -268,3 +276,9 @@ println("I have $num_fingers fingers and $num_toes toes.")
 #-
 
 println("That is $(num_fingers + num_toes) digits in all!!")
+println("That is $(num_fingers / num_toes) fingers per toe")
+
+"Here is a literal \$"
+println("Here is a literal \$")
+raw"Here is a literal $"
+path = raw"C:\Program Files\Somewhere"

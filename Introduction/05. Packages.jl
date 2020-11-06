@@ -8,7 +8,7 @@
 #
 # To see all available packages, check out
 #
-# https://pkg.julialang.org/
+# https://juliahub.com/
 # or
 # https://juliaobserver.com/
 #
