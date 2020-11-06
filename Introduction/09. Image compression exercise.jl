@@ -2,6 +2,7 @@
 
 using Images, LinearAlgebra
 
+cd("Introduction")
 banana = load("images/banana.jpg")
 
 # Images work just like arrays, but display specially
@@ -13,8 +14,10 @@ banana[60,50]
 gb = Gray.(banana)
 
 grayvals = channelview(gb)
+grayvals[end÷2 .+ (-10:10), end÷2 .+ (0:20)]
 
 channelview(banana)
+channelview(banana)[:, end÷2 .+ (-10:10), end÷2 .+ (0:20)]
 
 # we can take apart and reassemble the red, green, and blue channels
 RGB.(red.(banana), green.(banana), blue.(banana))

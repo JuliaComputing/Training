@@ -26,6 +26,7 @@ square("Hello ")
 #-
 
 square([1,2,3])
+square([1 2; 3 4])
 
 # #### Specifying the types of our input arguments
 #
@@ -139,44 +140,28 @@ g(1, 2)
 
 # ### "Diagonal" dispatch
 
-f(a::WildCardType, b::WildCardType) where {WildCardType<:Number} = "a and b are both $(T)s"
+f(a::T, b::T) where {T<:Number} = "a and b are both $(T)s"
+# not the same as this method:
+#  f(a::Number, b::Number)
 
-ff(a::T, b::T) where {T<:Number} = "a and b are both $(T)s"
-# ff(a::Number, b::Number) -- NOT THE SAME AS ABOVE
-ff(1, 1.0)
-
-ff(a::T, b::T, c::S, d::S) where {T<:Number, S<:Any} = "a and b are both $(T)s, c and d ar $(S)s"
-
-
-#-
-
-methods(f)
-
-#-
+f(1.5, 2.5)
+f(1, 1.0)
 
 f(big(1.5), big(2.5))
 
-#-
+methods(f)
 
 f(big(1), big(2)) # <== integer rule is more specific
 
-#-
-
 f(a::T, b::T) where {T<:Integer} = "both are $T integers"
-
-#-
-
-methods(f)
-
-#-
 
 f(big(1), big(2))
 
-#-
+methods(f)
 
 f("foo", "bar") # <== still doesn't apply to non-numbers
 
-# ### Varargs methods
+# ### Varargs methods ("Slurping")
 
 f(args::Number...) = "$(length(args))-ary heterogeneous call"
 f(args::T...) where {T<:Number} = "$(length(args))-ary homogeneous call"
@@ -195,6 +180,7 @@ f(1, 1.5, 2)
 
 #-
 
+# What do you think this will do?
 f()
 
 #-
@@ -205,14 +191,18 @@ f(1, 2) # <== previous 2-arg method is more specific
 
 f("foo") # <== still doesn't apply to non-numbers
 
-#-
+# ### Splatting (the opposite of slurping)
 
-## "splat" (more below)
-f([1, 2, 3]...)
+args = (1, 2, 3)
+f(args[1], args[2], args[3])
+f(args...)
+
+args = (1, 1.5, 2)
+f(args...)
 
 # ### Optional Arguments
 
-h(x, y = 0, z = y, k = 2x) = 2x + 3y
+h(x, y = 0) = 2x + 3y
 
 #-
 
@@ -227,8 +217,7 @@ methods(h)
 #-
 
 # ### Keyword Arguments
-const default_val = false
-k(x, y = 0; opt::Bool = default_val) = opt ? 2x+y : x+2y
+k(x, y = 0; opt::Bool = false) = opt ? 2x+y : x+2y
 
 #-
 
@@ -262,7 +251,7 @@ methods(k)
 
 k(2, opt=true)
 
-# ### Keyword arguments: slurp and splat
+# ### Slurping & splatting keyword arguments
 
 function allkw(; kw...)
     @show keys(kw)
