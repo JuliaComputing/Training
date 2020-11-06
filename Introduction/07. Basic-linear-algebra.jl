@@ -6,7 +6,7 @@
 
 # First let's define a random matrix
 
-A = rand(1:4,(3,3))
+A = rand(1:4, (3, 3))
 
 # Define a vector of ones
 
@@ -36,15 +36,15 @@ A'A
 # #### Solving linear systems
 # The problem $Ax=b$ for ***square*** $A$ is solved by the \ function.
 
-A\b
+A \ b
 
-# `A\b` gives us the *least squares solution* if we have an overdetermined linear system (a "tall" matrix)
+# `A \ b` gives us the *least squares solution* if we have an overdetermined linear system (a "tall" matrix)
 
 Atall = rand(3, 2)
 
 #-
 
-Atall\b
+Atall \ b
 
 # and the *minimum norm least squares solution* if we have a rank-deficient least squares problem
 
@@ -53,7 +53,7 @@ rankdef = hcat(v, v)
 
 #-
 
-rankdef\b
+rankdef \ b
 
 # Julia also gives us the minimum norm solution when we have an underdetermined solution (a "short" matrix)
 
@@ -62,7 +62,7 @@ Ashort = rand(2, 3)
 
 #-
 
-Ashort\bshort
+Ashort \ bshort
 
 # # The LinearAlgebra library
 #

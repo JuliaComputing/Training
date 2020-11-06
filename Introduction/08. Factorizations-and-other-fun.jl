@@ -11,6 +11,7 @@
 # Before we get started, let's set up a linear system and use `LinearAlgebra` to bring in the factorizations and special matrix structures.
 
 using LinearAlgebra
+
 A = rand(3, 3)
 x = fill(1, (3,))
 b = A * x
@@ -36,7 +37,7 @@ typeof(Alu)
 
 Alu.P
 
-#-
+# (This permutation matrix would be a good candidate for an efficient specialized matrix type)
 
 Alu.L
 
@@ -46,18 +47,23 @@ Alu.U
 
 norm(Alu.L * Alu.U - Alu.P * A)
 
+# Check if the product is "close enough"
+
+Alu.L * Alu.U ≈ Alu.P * A
+
 # Julia can dispatch methods on factorization objects.
 #
 # For example, we can solve the linear system using either the original matrix or the factorization object.
 
-@which A\b
+@which A \ b
 
 #-
 
-@which Alu\b
+@which Alu \ b
 
 # Similarly, we can calculate the determinant of `A` using either `A` or the factorization object
 
+det(A), det(Alu)
 det(A) ≈ det(Alu)
 
 # #### QR factorizations
@@ -74,6 +80,8 @@ Aqr = qr(A)
 # Similarly to the LU factorization, the matrices `Q` and `R` can be extracted from the QR factorization object via
 
 Aqr.Q
+Aqr.Q'Aqr.Q
+Aqr.Q'Aqr.Q ≈ I
 
 #-
 
@@ -88,6 +96,7 @@ Aqr.R
 # The eigendecomposition can be computed
 
 Asym = A + A'
+Asym == Asym'
 AsymEig = eigen(Asym)
 
 # The values and the vectors can be extracted from the Eigen type by special indexing
@@ -98,6 +107,8 @@ AsymEig.values
 #-
 
 AsymEig.vectors
+AsymEig.vectors'AsymEig.vectors
+AsymEig.vectors'AsymEig.vectors ≈ I
 
 # Once again, when the factorization is stored in a type, we can dispatch on it and write specialized methods that exploit the properties of the factorization, e.g. that $A^{-1}=(V\Lambda V^{-1})^{-1}=V\Lambda^{-1}V^{-1}$.
 
@@ -107,7 +118,7 @@ inv(AsymEig)*Asym
 # Matrix structure is very important in linear algebra. To see *how* important it is, let's work with a larger linear system
 
 n = 1000
-A = randn(n,n);
+A = randn(n, n)
 
 # Julia can often infer special matrix structure
 
@@ -131,15 +142,15 @@ issymmetric(Asym_explicit)
 
 # Let's compare how long it takes Julia to compute the eigenvalues of `Asym`, `Asym_noisy`, and `Asym_explicit`
 
-@time eigvals(Asym);
+@elapsed eigvals(Asym)
 
 #-
 
-@time eigvals(Asym_noisy)
+@elapsed eigvals(Asym_noisy)
 
 #-
 
-@time eigvals(Asym_explicit)
+@elapsed eigvals(Asym_explicit)
 
 # In this example, using `Symmetric()` on `Asym_noisy` made our calculations about `5x` more efficient :)
 
@@ -148,9 +159,11 @@ issymmetric(Asym_explicit)
 # #### A big problem
 # Using the `Tridiagonal` and `SymTridiagonal` types to store tridiagonal matrices makes it possible to work with potentially very large tridiagonal problems. The following problem would not be possible to solve on a laptop if the matrix had to be stored as a (dense) `Matrix` type.
 
-n = 1_000_000;
+n = 1_000_000
 A = SymTridiagonal(randn(n), randn(n-1))
-@time eigvals(A)
+
+## this takes a while but is doable:
+# @time eigvals(A)
 
 # ## Generic linear algebra
 # The usual way of adding support for numerical linear algebra is by wrapping BLAS and LAPACK subroutines. For matrices with elements of `Float32`, `Float64`, `Complex{Float32}` or `Complex{Float64}` this is also what Julia does.
@@ -167,66 +180,55 @@ A = SymTridiagonal(randn(n), randn(n-1))
 # #### Example: Rational linear system of equations
 # The following example shows how linear system of equations with rational elements can be solved without promoting to floating point element types. Overflow can easily become a problem when working with rational numbers so we use `BigInt`s.
 
-Arational = Matrix{Rational{BigInt}}(rand(1:10, 3, 3))/10
+Arat = map(big, rand(1:10, 3, 3))//10
 
 #-
 
 x = fill(1, 3)
-b = Arational*x
+b = Arat*x
 
 #-
 
-Arational\b
+Arat \ b
+Float64.(Arat) \ Float64.(b)
 
 #-
-using LinearAlgebra
-lu(Arational)
-inv(Arational)
+
+lu(Arat)
+inv(Arat)
+inv(inv(Arat)) == Arat
+
+qr(Arat)
+
 # ### Exercises
-#
-# #### 11.1
-# What are the eigenvalues of matrix A?
-#
-# ```
-# A =
-# [
-#  140   97   74  168  131
-#   97  106   89  131   36
-#   74   89  152  144   71
-#  168  131  144   54  142
-#  131   36   71  142   36
-# ]
-# ```
-# and assign it a variable `A_eigv`
 
 using LinearAlgebra
 
- A =
- [
-  140   97   74  168  131
+A =
+[ 140   97   74  168  131
    97  106   89  131   36
    74   89  152  144   71
   168  131  144   54  142
-  131   36   71  142   36
-]
+  131   36   71  142   36 ]
 
-eigvals(A)
-#-
+# #### 11.1
+# What are the eigenvalues of matrix A?
 
 @assert A_eigv ==  [-128.49322764802145, -55.887784553056875, 42.7521672793189, 87.16111477514521, 542.4677301466143]
 
 # #### 11.2
 # Create a `Diagonal` matrix from the eigenvalues of `A`.
 
-E = Array(Diagonal(eigvals(A)))
+@assert A_diag ==
+  [ -128.493    0.0      0.0      0.0       0.0
+       0.0    -55.8878   0.0      0.0       0.0
+       0.0      0.0     42.7522   0.0       0.0
+       0.0      0.0      0.0     87.1611    0.0
+       0.0      0.0      0.0      0.0     542.468 ]
 
-@assert A_diag ==  [-128.493    0.0      0.0      0.0       0.0;
-    0.0    -55.8878   0.0      0.0       0.0;
-    0.0      0.0     42.7522   0.0       0.0;
-    0.0      0.0      0.0     87.1611    0.0;
-    0.0 0.0      0.0      0.0     542.468]
-## #### 11.3
-## Create a `LowerTriangular` matrix from `A` and store it in `A_lowertri`
+# #### 11.3
+# Create a `LowerTriangular` matrix from `A` and store it in `A_lowertri`
+
 @assert A_lowertri ==  [140    0    0    0   0;
   97  106    0    0   0;
   74   89  152    0   0;

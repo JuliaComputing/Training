@@ -310,10 +310,10 @@ uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.8.3"
 
 [[EarCut_jll]]
-deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "eabac56550a7d7e0be499125673fbff560eb8b20"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "92d8f9f208637e8d2d28c664051a00569c01493d"
 uuid = "5ae413db-bbd1-5e63-b57d-d24a61df00f5"
-version = "2.1.5+0"
+version = "2.1.5+1"
 
 [[EllipsisNotation]]
 git-tree-sha1 = "65dad386e877850e6fce4fc77f60fe75a468ce9d"
