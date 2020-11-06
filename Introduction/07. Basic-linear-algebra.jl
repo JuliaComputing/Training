@@ -2,6 +2,8 @@
 # Author: Andreas Noack Jensen (MIT) (http://www.econ.ku.dk/phdstudent/noack/)
 # (with edits from Jane Herriman)
 
+using LinearAlgebra
+
 #-
 
 # First let's define a random matrix
@@ -23,6 +25,9 @@ b = A*x
 # As in other languages `A'` is the conjugate transpose, or adjoint
 
 A'
+
+Z = A + A*im
+Z'
 
 # and we can get the transpose with
 
@@ -64,9 +69,31 @@ Ashort = rand(2, 3)
 
 Ashort \ bshort
 
-# # The LinearAlgebra library
-#
-# While much of linear algebra is available in Julia by default (as shown above), there's a standard library named `LinearAlgebra` that brings in many more relevant names and functions. In particular, it provides factorizations and some structured matrix types.  As with all packages, you can bring these additional features into your session with a `using LinearAlgebra`.
+# ## Dot products and row vectors
+
+v = [1,2,3]
+dot(v,v)
+
+# We distinguish "row vectors" from "row matrices"
+
+rowmat = [1 2 3]
+rowvec = [1,2,3]'
+
+rowmat * v
+
+rowvec * v
+
+# ## Diagonals
+
+# `diag` gives the diagonal of a matrix
+
+diag(A)
+
+# `diagm` constructs diagonal matrices
+
+diagm(v)
+
+# Though there is a much better way...
 
 #-
 
