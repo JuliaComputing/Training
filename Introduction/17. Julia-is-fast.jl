@@ -1,12 +1,15 @@
 # # Julia is fast
 #
-# Very often, benchmarks are used to compare languages.  These benchmarks can lead to long discussions, first as to exactly what is being benchmarked and secondly what explains the differences.  These simple questions can sometimes get more complicated than you at first might imagine.
+# Very often, benchmarks are used to compare languages.
+# These benchmarks can lead to long discussions, first as to exactly what is being
+# benchmarked and secondly what explains the differences.  These simple questions
+# can sometimes get more complicated than you at first might imagine.
 #
-# The purpose of this notebook is for you to see a simple benchmark for yourself.  One can read the notebook and see what happened on the author's Macbook Pro with a 4-core Intel Core I7, or run the notebook yourself.
+# The purpose of this notebook is for you to see a simple benchmark for yourself.
+# See what happens on your machine --- results may vary!
 #
-# (This material began life as a wonderful lecture by Steven Johnson at MIT: https://github.com/stevengj/18S096/blob/master/lectures/lecture1/Boxes-and-registers.ipynb.)
-
-#-
+# (This material began life as a wonderful lecture by Steven Johnson at MIT:
+# https://github.com/stevengj/18S096/blob/master/lectures/lecture1/Boxes-and-registers.ipynb.)
 
 # # Outline of this notebook
 #
@@ -24,7 +27,7 @@
 
 #-
 
-# # `sum`: An easy enough function to understand
+# # How many ways to `sum` numbers could there be?
 
 #-
 
@@ -36,8 +39,6 @@
 
 a = rand(10^7) # 1D vector of random numbers, uniform on [0,1)
 
-#-
-
 sum(a)
 
 # The expected result is 0.5 * 10^7, since the mean of each entry is 0.5
@@ -48,13 +49,11 @@ sum(a)
 
 @time sum(a)
 
-#-
+@time sum(a)
 
 @time sum(a)
 
 #-
-
-@time sum(a)
 
 # The `@time` macro can yield noisy results, so it's not our best choice for benchmarking!
 #
@@ -72,9 +71,9 @@ using BenchmarkTools
 
 # #  1. The C language
 #
-# C is often considered the gold standard: difficult on the human, nice for the machine. Getting within a factor of 2 of C is often satisfying. Nonetheless, even within C, there are many kinds of optimizations possible that a naive C writer may or may not get the advantage of.
-#
-# The current author does not speak C, so he does not read the cell below, but is happy to know that you can put C code in a Julia session, compile it, and run it. Note that the `"""` wrap a multi-line string.
+# C is often considered the gold standard: difficult on the human, nice for the machine.
+# Getting within a factor of 2 of C is often satisfying. Nonetheless, even within C, there
+# are many kinds of optimizations possible that a naive C writer may or may not get the advantage of.
 
 using Libdl
 C_code = """
@@ -114,12 +113,6 @@ c_sum(a) - sum(a)
 
 #-
 
-≈ # alias for the `isapprox` function
-
-#-
-
-?isapprox
-
 # We can now benchmark the C code directly from Julia:
 
 c_bench = @benchmark c_sum($a)
@@ -137,7 +130,6 @@ d
 #-
 
 using Plots
-gr()
 
 #-
 
@@ -214,7 +206,7 @@ using Conda
 
 #-
 
-## Conda.add("numpy")
+# Conda.add("numpy")
 
 #-
 
