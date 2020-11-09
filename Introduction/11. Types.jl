@@ -164,7 +164,7 @@ Vector == Array{T,1} where T
 # Types with different parameters are just different, and have no subtype
 # relationship. This is called *invariance*.
 
-Array{Int} <: Array{<:Real}
+Array{Int} <: Array{Real}
 
 # This is surprising at first, but makes sense if you think about memory
 # representations.
@@ -176,7 +176,7 @@ Array{Int} <: Array{<:Real}
 
 # ### Defining types with parameters
 
-struct GenericPoint{T<:Real, S, U, V}
+struct GenericPoint{T<:Real}
     x::T
     y::T
 end

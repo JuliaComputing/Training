@@ -6,7 +6,7 @@ cd("Introduction")
 banana = load("images/banana.jpg")
 
 # Images work just like arrays, but display specially
-
+typeof(banana)
 size(banana)
 
 banana[60,50]
@@ -63,7 +63,7 @@ function compress_image(img, factor)
     # your code here
 end
 
-compress_image("images/banana.jpg",2)
+compress_image(banana, 2)
 
 # Remember: you can index arrays with `:` and ranges `a:b`:
 

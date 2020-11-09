@@ -83,6 +83,8 @@ rowmat * v
 
 rowvec * v
 
+v'v
+
 # ## Diagonals
 
 # `diag` gives the diagonal of a matrix
@@ -104,11 +106,13 @@ diagm(v)
 
 v = [1,2,3]
 
+dot_v = v'v
+
 #-
 
 @assert dot_v == 14
 
 # #### 10.2
-# Take the outer product of a vector v with itself and assign it to variable `cross_v`
+# Take the outer product of a vector v with itself and assign it to variable `outer_v`
 
-@assert cross_v == [0, 0, 0]
+@assert size(outer_v) == (3, 3)
