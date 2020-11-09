@@ -118,22 +118,7 @@ findclosest2(data, 0.5) == findclosest(data, .5)
 # By understanding the basics of how Julia _can_ be fast, you can get a better
 # sense for how to write fast Julia code.
 #
-# Perhaps most importantly, Julia can reason about types. Recall: this is the definition of `findclosest2`:
-#
-# ```julia
-# function findclosest2(data, point)
-#     bestval = first(data)
-#     bestdist = abs(bestval - point)
-#     for elt in data
-#         dist = abs(elt - point)
-#         if dist < bestdist
-#             bestval = elt
-#             bestdist = dist
-#         end
-#     end
-#     return bestval
-# end
-# ```
+# Perhaps most importantly, Julia can reason about types.
 
 @code_typed debuginfo=:none optimize=false findclosest2(data, 0.5)
 
@@ -143,7 +128,7 @@ typeof(data)
 
 #%%
 
-newdata = Real[data...]
+newdata = Vector{Any}(data)
 typeof(newdata)
 
 #%%
@@ -229,4 +214,4 @@ x = 0.5 # non-constant global
 #
 # * Measure, measure, measure!
 # * Get familiar with the [Performance Tips](https://docs.julialang.org/en/v1/manual/performance-tips/)
-# * Don't be scared of `@code_typed`/`@code_warntype` and `@code_llvm`
+# * Use `@code_typed`/`@code_warntype` and `@code_llvm`
