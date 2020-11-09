@@ -31,6 +31,8 @@ myfavoriteanimals[1]
 
 myfavoriteanimals[1] = "otters"
 
+typeof((1, ""))
+
 # ## NamedTuples
 #
 # As you might guess, `NamedTuple`s are just like `Tuple`s except that each element additionally has a name! They have a special syntax using `=` inside a tuple:
@@ -60,6 +62,8 @@ myfavoriteanimals.bird
 # A good example is a contacts list, where we associate names with phone numbers.
 
 myphonebook = Dict("Jenny" => "867-5309", "Ghostbusters" => "555-2368")
+name="Stefan"
+1+2 => "hi $(name)"
 
 # In this example, each name and number is a "key" and "value" pair. We can grab Jenny's number (a value) using the associated key
 
@@ -93,11 +97,22 @@ myphonebook[1]
 
 days_in_month = Dict{String,Int}("January"=>31, "February"=>28, "March"=>31, "April"=>30)
 
+days_in_month = Dict{String,Int}()
+
 # As in arrays, values are converted on assignment:
 
 days_in_month["May"] = 31.0
 
 days_in_month
+
+isequal(-0.0, 0.0)
+isequal(NaN, NaN)
+
+d = Dict(-0.0 => 1, 0.0 => 2)
+
+typeof(1+2 => 2+3)
+
+d[0]
 
 # ### Exercises
 

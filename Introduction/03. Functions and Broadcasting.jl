@@ -14,7 +14,7 @@
 function sayhi(name)
     println("Hi $name, it's great to see you!")
 end
-
+sayhi("Stefan")
 #-
 
 function f(x)
@@ -52,6 +52,8 @@ sayhi3 = name -> println("Hi $name, it's great to see you!")
 #-
 
 f3 = x -> x^2
+
+(x -> x^2)(10)
 
 #-
 
@@ -120,6 +122,8 @@ v
 #
 # Recall that variable assignments is just a naming game. Now consider this attempt at a mutating function:
 
+big_matrix = rand(1000,1000)
+
 function setzero!(x)
     x = 0
     return x
@@ -129,6 +133,8 @@ y = 1
 # Do you think this will be able to set `y` to zero? Try it:
 
 setzero!(y)
+
+setzero!(big_matrix)
 
 #-
 

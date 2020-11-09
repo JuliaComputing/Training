@@ -29,9 +29,15 @@ squares[1]
 
 squares[1:3]
 
+# Ranges are just a special kind of (immutable) vector
+
+squares[[2,3,1]]
+
+(2:10)[2] = 1
+
 #-
 
-squares[2:end]
+squares[begin+1:end]
 
 #-
 
@@ -54,6 +60,7 @@ cubes = [1, 8, 27, 64, 125, 216, 343, 512]
 #-
 
 powers = [1:8 squares cubes]
+hcat(1:8, squares, cubes)
 
 #-
 
@@ -75,10 +82,12 @@ typeof(powers)
 # Semicolon separators perform vertical concatenation:
 
 [squares; cubes]
-
+vcat(squares, cubes)
 # Whereas commas would simply create an array of arrays:
 
 nested_powers = [[1,2,3,4,5,6,7,8], squares, cubes]
+
+[[1], "hi", [2,3,4]]
 
 #-
 
@@ -110,6 +119,11 @@ for pow in 1:3
     end
 end
 A
+
+B = fill("text", 8, 3)
+for pow in 1:3, value in 1:8
+    B[value, pow] = value ^ pow
+end
 
 #-
 
@@ -150,6 +164,8 @@ powers[1,1]
 
 fortytwosarray = [42, 42.0, 4.20e1, 4.20f1, 84//2, 0x2a]
 
+promote(1, 2.0)
+
 #-
 
 for x in fortytwosarray
@@ -181,6 +197,8 @@ push!(fib, 21)
 #-
 
 push!(fib, sum(fib[end-1:end]))
+
+sum(x^2 for x in 1:10)
 
 #-
 
