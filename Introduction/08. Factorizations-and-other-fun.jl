@@ -36,6 +36,7 @@ typeof(Alu)
 # The different parts of the factorization can be extracted by accessing their special properties
 
 Alu.P
+Alu.p
 
 # (This permutation matrix would be a good candidate for an efficient specialized matrix type)
 
@@ -55,11 +56,11 @@ Alu.L * Alu.U ≈ Alu.P * A
 #
 # For example, we can solve the linear system using either the original matrix or the factorization object.
 
-@which A \ b
+A \ b
 
 #-
 
-@which Alu \ b
+Alu \ b
 
 # Similarly, we can calculate the determinant of `A` using either `A` or the factorization object
 
@@ -113,6 +114,7 @@ AsymEig.vectors'AsymEig.vectors ≈ I
 # Once again, when the factorization is stored in a type, we can dispatch on it and write specialized methods that exploit the properties of the factorization, e.g. that $A^{-1}=(V\Lambda V^{-1})^{-1}=V\Lambda^{-1}V^{-1}$.
 
 inv(AsymEig)*Asym
+inv(AsymEig)*Asym ≈ I
 
 # ## Special matrix structures
 # Matrix structure is very important in linear algebra. To see *how* important it is, let's work with a larger linear system
@@ -180,11 +182,11 @@ A = SymTridiagonal(randn(n), randn(n-1))
 # #### Example: Rational linear system of equations
 # The following example shows how linear system of equations with rational elements can be solved without promoting to floating point element types. Overflow can easily become a problem when working with rational numbers so we use `BigInt`s.
 
-Arat = map(big, rand(1:10, 3, 3))//10
+Arat = map(big, rand(1:100, 3, 3)).//rand(1:100, 3, 3)
 
 #-
 
-x = fill(1, 3)
+x = [1, 2, 3]
 b = Arat*x
 
 #-
@@ -196,6 +198,8 @@ Float64.(Arat) \ Float64.(b)
 
 lu(Arat)
 inv(Arat)
+inv(Arat)*Arat == I
+Arat*inv(Arat) == I
 inv(inv(Arat)) == Arat
 
 qr(Arat)
@@ -214,20 +218,38 @@ A =
 # #### 11.1
 # What are the eigenvalues of matrix A?
 
-@assert A_eigv ==  [-128.49322764802145, -55.887784553056875, 42.7521672793189, 87.16111477514521, 542.4677301466143]
+A_eigv = eigen(A).values
+
+@assert A_eigv ≈ [-128.49322764802145, -55.887784553056875, 42.7521672793189, 87.16111477514521, 542.4677301466143]
+
+A_eigv = eigvals(A)
+
+@assert A_eigv == [-128.49322764802145, -55.887784553056875, 42.7521672793189, 87.16111477514521, 542.4677301466143]
 
 # #### 11.2
 # Create a `Diagonal` matrix from the eigenvalues of `A`.
 
-@assert A_diag ==
-  [ -128.493    0.0      0.0      0.0       0.0
-       0.0    -55.8878   0.0      0.0       0.0
-       0.0      0.0     42.7522   0.0       0.0
-       0.0      0.0      0.0     87.1611    0.0
-       0.0      0.0      0.0      0.0     542.468 ]
+# `Diagonal`: efficient representation of a diagonal matrix
+
+D = [ -128.493    0.0      0.0      0.0       0.0
+         0.0    -55.8878   0.0      0.0       0.0
+         0.0      0.0     42.7522   0.0       0.0
+         0.0      0.0      0.0     87.1611    0.0
+         0.0      0.0      0.0      0.0     542.468 ]
+
+A_diag = diagm(d) # correct but not the type we wanted
+A_diag = Diagonal(d) # <= this is what we want
+
+@assert A_diag == D
+@assert A_diag isa Diagonal
+
+A_diag = Diagonal(D) # could also do this if we had D first
+A_diag = Diagonal(diagm(d)) # correct but inefficient!
 
 # #### 11.3
 # Create a `LowerTriangular` matrix from `A` and store it in `A_lowertri`
+
+A_lowertri = LowerTriangular(A)
 
 @assert A_lowertri ==  [140    0    0    0   0;
   97  106    0    0   0;

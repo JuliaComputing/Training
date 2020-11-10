@@ -45,7 +45,7 @@ xflip!()
 #
 # **Without changing syntax, we can create this plot with the UnicodePlots backend**
 
-Pkg.add("UnicodePlots")
+# Pkg.add("UnicodePlots")
 unicodeplots()
 
 #-
@@ -61,13 +61,19 @@ title!("Influence of pirate population on global warming")
 #-
 
 # ### Exercises
+
+# #### 8.0 (preparation)
 #
+# 1. `] instantiate` or `import Pkg; Pkg.instantiate()`
+# 2. `using Plots`
+# 3. `gr()`
+
 # #### 8.1
 # Given
 # ```julia
 # x = -10:10
 # ```
-# plot y vs. x for $y = x^2$.  You may want to change backends back again.
+# plot y vs. x for $y = x.^2$.  You may want to change backends back again.
 
 
 
@@ -81,3 +87,11 @@ p4 = plot(x, x.^4)
 plot(p1, p2, p3, p4, layout = (2, 2), legend = false)
 
 # and then create a $4x1$ plot that uses `p1`, `p2`, `p3`, and `p4` as subplots.
+
+m, n = 3, 4
+plots = []
+for i = 1:m*n
+    p = plot(x, x.^i)
+    push!(plots, p)
+end
+plot(plots..., layout = (m, n), legend = false)

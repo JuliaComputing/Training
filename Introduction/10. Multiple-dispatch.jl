@@ -25,7 +25,7 @@ square("Hello ")
 
 #-
 
-square([1,2,3])
+square([1, 2, 3])
 square([1 2; 3 4])
 
 # #### Specifying the types of our input arguments
@@ -140,14 +140,12 @@ g(1, 2)
 
 # ### "Diagonal" dispatch
 
-f(a::T, b::T) where {T<:Number} = "a and b are both $(T)s"
+f(a::T, b::T) where {T <: Number} = "a and b are both $(T)s"
 # not the same as this method:
 #  f(a::Number, b::Number)
 
-f(1.5, 2.5)
-f(1, 1.0)
-
 f(big(1.5), big(2.5))
+f(1, 1.0)
 
 methods(f)
 
@@ -200,9 +198,14 @@ f(args...)
 args = (1, 1.5, 2)
 f(args...)
 
+# WARNING!
+
+v = rand(100)
++(v...)
+
 # ### Optional Arguments
 
-h(x, y = 0) = 2x + 3y
+h(x, y = 0, z = 4x - y) = 2x + 3y
 
 #-
 
@@ -253,13 +256,12 @@ k(2, opt=true)
 
 # ### Slurping & splatting keyword arguments
 
-function allkw(; kw...)
-    @show keys(kw)
-end
+allkw(; kw...) = kw
 
 #-
 
 allkw(a=1, b=2, c=3)
+allkw(b=2, c=3, a=1)
 
 # Just like iterators can be splatted as positional arguments, dict-like collections and named tuples can be splatted as keyword arguments.
 
