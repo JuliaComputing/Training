@@ -35,6 +35,7 @@ supertype(Signed)
 supertype(Integer)
 supertype(Real)
 supertype(Number)
+supertype(Any)
 
 # `isa` queries whether a value belongs to a type.
 # `<:` queries whethe one type is a subtype (subset) of another
@@ -52,6 +53,30 @@ isa(2, Int)
 2::String
 
 convert(Int, 2.0)
+
+Int(2.0)
+
+# There is a somewhat special type `Type` with the property
+#   T isa Type{T}   for all types T
+
+Int isa Type{Int}
+Int isa Type{Any}
+
+# This allows dispatch on types themselves, not just instances of types
+
+g(::Int) = 0
+
+f(::Type{Int}, y) = "got Int and $y"
+
+f(Integer, 'a')
+
+# Note: `String` is a type, but `string` is a function
+# `string` gives the printed representation of any value, but `String` will
+# only convert things that are already string-like to the `String` type.
+
+string([], 1, 2)
+
+String <: AbstractString
 
 #-
 
@@ -72,6 +97,14 @@ p = Point(1,2)
 Point() = Point(0,0)
 
 Point()
+
+# This is actually equivalent to the following; dispatch works the same in all
+# positions, including the called object:
+(::Type{Point})() = Point(0,0)
+
+(::String)(x) = "wow"
+
+""(1)
 
 Int(2.0)
 
@@ -112,6 +145,11 @@ x.y = 0
 x
 
 fieldnames(Point)
+fieldtypes(Point)
+
+fieldtype(Point, :x)
+
+Dict(zip(fieldnames(Point), fieldtypes(Point)))
 
 # ### Primitive types
 #
@@ -137,17 +175,19 @@ dump(Array)
 # `Array` is an *iterated union* of dense, in-memory arrays over all
 # element types and numbers of dimensions.
 
-Array == (Array{T,N} where N where T){Int}
+Array == (Array{T,N} where N where T)
+
+(Array{T,N} where N where T){Int,2}
 
 # The curly braces substitute values for these variables:
 
 Array{Int} == Array{Int,N} where N
 
-Array{Int} <: Array
+Array{Int,2} <: Array{Int} <: Array
 
 (Array{T,3} where T) <: Array
 
-Array{<:Number,3}
+Array{<:Any,3}
 
 [1,2] isa Array{Int}
 
@@ -164,7 +204,9 @@ Vector == Array{T,1} where T
 # Types with different parameters are just different, and have no subtype
 # relationship. This is called *invariance*.
 
-Array{Int} <: Array{Real}
+Array{Int,1} <: Array{Real,1}
+
+Array{Any} <: Array{Real}
 
 # This is surprising at first, but makes sense if you think about memory
 # representations.
@@ -180,8 +222,14 @@ struct GenericPoint{T<:Real}
     x::T
     y::T
 end
+
+# Default constructors are provided
 methods(Point)
 methods(GenericPoint)
+
+GenericPoint{Int}(1.0, 2.0)
+
+GenericPoint(0.0, 1.0)
 
 GenericPoint(x, y) = GenericPoint(promote(x,y)...)
 
@@ -216,6 +264,26 @@ x()
 
 GenericPoint() = 2
 GenericPoint()
+
+# ## "Inner" constructors for enforcing invariants
+
+# If you define constructors (methods on types) inside the `struct` block,
+# no default constructors are generated.
+# Instead, you have access to a special pseudo-function `new` that just
+# constructs instances directly.
+
+# This point type only allows lower-triangle points, i.e. those where x>y:
+
+struct LowerTrianglePoint
+    x::Int
+    y::Int
+    LowerTrianglePoint(x, y) = x > y ? new(x, y) : error("invalid arguments")
+end
+
+LowerTrianglePoint(1, 1)
+LowerTrianglePoint(2, 1)
+
+methods(LowerTrianglePoint)
 
 # ## Tuple types
 #
