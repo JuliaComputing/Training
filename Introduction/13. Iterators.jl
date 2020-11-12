@@ -50,9 +50,14 @@ string(A...)
 # `collect` gives you elements of an iterator as an array.
 # Comprehensions work by calling `collect` on a generator.
 
+pairs(A)
+
 collect(pairs(A))
 summary(collect(pairs(A)))
 collect(zip(100:102,A))
+
+for (intval, charval) in zip(100:102, A)
+end
 
 # There are several other highly popular iteration utilities in the
 # built-in module `Iterators`:
@@ -107,11 +112,13 @@ end
 Base.iterate(r::SimpleRange, state = r.lo) = state > r.hi ? nothing : (state, state+1)
 Base.length(r::SimpleRange) = r.hi - r.lo + 1
 
-(:) = SimpleRange
-
-10:20
+let (:) = SimpleRange
+  10:20
+end
 
 collect(SimpleRange(2,8))
+
+string(SimpleRange(2,8)...)
 
 # ## Iterator traits
 #
@@ -130,7 +137,7 @@ struct Fibs
     N::Int
 end
 
-function Base.iterate(i::Fibs, state)
+function Base.iterate(i::Fibs, state=_)
     # your code here
 end
 
