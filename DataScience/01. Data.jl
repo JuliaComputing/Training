@@ -157,6 +157,8 @@ deserialize("f.jls")(10)
 #-
 
 # JLD uses libhdf5 to write almost any julia data to HDF5 files.
+# It cleverly tries to maintain as much julia-specific metadata as possible,
+# while still being fully HDF5-compatible.
 # It has been around for a long time.
 
 using JLD
@@ -202,7 +204,7 @@ P_df = C
 
 ## Q1: Which year was was a given language invented?
 function year_created(P_df, language::String)
-    loc = findfirst(P_df.language .== language)
+    loc = findfirst(==(language), P_df.language)
     return P_df.year[loc]
 end
 year_created(P_df, "Julia")
@@ -214,7 +216,7 @@ year_created(P_df, "W")
 #-
 
 function year_created_handle_error(P_df, language::String)
-    loc = findfirst(P_df.language .== language)
+    loc = findfirst(==(language), P_df.language)
     !isnothing(loc) && return P_df.year[loc]
     error("Error: Language not found.")
 end
@@ -223,11 +225,7 @@ year_created_handle_error(P_df, "W")
 #-
 
 ## Q2: How many languages were created in a given year?
-function how_many_per_year(P_df, year::Int64)
-    year_count = length(findall(P_df.year .== year))
-    return year_count
-end
-how_many_per_year(P_df, 2011)
+count(==(2011), P_df.year)
 
 # Next, we'll use dictionaries. A quick way to create a dictionary is with the `Dict()` function.
 # But this creates a dictionary without types. Here, we will specify the types of this dictionary.
@@ -257,12 +255,7 @@ length(keys(P_dictionary))
 
 ## Q1: Which year was was a given language invented?
 ## now instead of looking in one long vector, we will look in many small vectors
-function year_created(P_dictionary, language::String)
-    keys_vec = collect(keys(P_dictionary))
-    lookup = map(keyid -> findfirst(P_dictionary[keyid] .== language), keys_vec)
-    # now the lookup vector has `nothing` or a numeric value. We want to find the index of the numeric value.
-    return keys_vec[findfirst((!isnothing).(lookup))]
-end
+year_created(dict, language::String) = findfirst(vec->in(language, vec), dict)
 year_created(P_dictionary, "Julia")
 
 #-
