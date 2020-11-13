@@ -9,6 +9,24 @@ using DelimitedFiles
 using CSV
 using XLSX
 
+# A DataFrame is structured by columns
+
+food = ["apple", "cucumber", "tomato", "banana"]
+calories = [105,47,22,105]
+price = [0.85,1.6,0.8,0.6,]
+dataframe_calories = DataFrame(item=food, calories=calories)
+dataframe_prices = DataFrame(item=food, price=price)
+
+#-
+
+DF = innerjoin(dataframe_calories, dataframe_prices, on=:item)
+
+# Shortcut:
+
+dataframe_foods = DataFrame(; food, calories, price)
+
+#-
+
 # # 🗃️ Get some data
 # In Julia, it's pretty easy to dowload a file from the web using the `download` function.
 # But also, you can use your favorite command line tool to download files by easily switching
@@ -88,24 +106,6 @@ G[2][1:10]
 # _unwrap_ these arrays and pass them to the DataFrame constructor.
 
 D = DataFrame(G...) # equivalent to DataFrame(G[1],G[2])
-
-#-
-
-food = ["apple", "cucumber", "tomato", "banana"]
-calories = [105,47,22,105]
-price = [0.85,1.6,0.8,0.6,]
-dataframe_calories = DataFrame(item=food, calories=calories)
-dataframe_prices = DataFrame(item=food, price=price)
-
-# Shortcut:
-
-dataframe_foods = DataFrame(; food, calories, price)
-
-#-
-
-DF = innerjoin(dataframe_calories, dataframe_prices, on=:item)
-
-#-
 
 ## we can also use the DataFrame constructor on a Matrix
 DataFrame(T)
