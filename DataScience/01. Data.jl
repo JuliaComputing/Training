@@ -25,6 +25,16 @@ DF = innerjoin(dataframe_calories, dataframe_prices, on=:item)
 
 dataframe_foods = DataFrame(; food, calories, price)
 
+# Indexing with `!` returns columns by reference; `:` copies
+# Can also use `view` as with arrays
+
+DF[!, [:price, :item]]
+DF.price
+
+# Can also construct a new DF by reference
+
+DataFrame(; DF.price, DF.item)
+
 #-
 
 # # 🗃️ Get some data
@@ -152,7 +162,7 @@ deserialize("f.jls")(10)
 # * Not compatible with any other formats (though you could use e.g. pyjulia for reading)
 # * No partial reads/writes; need to use multiple files instead
 # * Probably slower than special-purpose formats when the data is constrained
-# * Julia version 1.x is guaranteed to read files written by 1.(x-1), but not the other way around.
+# * Julia version 1.x is guaranteed to read files written by 1.(x-n), but not the other way around.
 
 #-
 
@@ -202,6 +212,10 @@ P_df = C
 # - Which year was was a given language invented?
 # - How many languages were created in a given year?
 
+f = in(1:10)
+
+f(11)
+
 ## Q1: Which year was was a given language invented?
 function year_created(P_df, language::String)
     loc = findfirst(==(language), P_df.language)
@@ -225,7 +239,7 @@ year_created_handle_error(P_df, "W")
 #-
 
 ## Q2: How many languages were created in a given year?
-count(==(2011), P_df.year)
+count(==(1957), P_df.year)
 
 # Next, we'll use dictionaries. A quick way to create a dictionary is with the `Dict()` function.
 # But this creates a dictionary without types. Here, we will specify the types of this dictionary.
@@ -239,6 +253,11 @@ Dict([("A", 1), ("B", 2), (1,[1,2])])
 # languages created in each year as their values.
 
 P_dictionary = Dict{Integer, Vector{String}}()
+Vector{String}()
+
+P_dictionary
+
+get!(Vector{String}, P_dictionary, 1991)
 
 for (year, language) in eachrow(P_df)
     langs = get!(Vector{String}, P_dictionary, year)
@@ -279,10 +298,20 @@ if 1 == missing
     # oops
 end
 
+ismissing(missing)
+
+# `===` as "exact" or "programmer" equality also works:
+
+missing === missing
+
 # There are many possible designs for missing data. The "standard" `missing` uses a
 # single dedicated type for all missing data:
 
 d = [1, missing, 2, missing]  # Vector{Union{Missing, Int64}}
+
+["", missing]
+
+[[], missing]
 
 # Some alternate designs are:
 # DataValues.jl - A missing value has a type, and the missingness is indicated by a
