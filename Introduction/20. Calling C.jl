@@ -4,7 +4,7 @@
 # franca among all programming languages!
 
 # To call libc, or anything else in the current process' global namespace,
-# you just need the name of the function:
+# you just need the name of the function, and its argument and return types:
 ccall(:puts, Cint, (Cstring,), "Hello")
 
 # We have a family of types beginning with `C`: Cint, Cchar, Cdouble, Cvoid, ...
@@ -16,9 +16,17 @@ ccall(:puts, Cint, (Cstring,), "Hello")
 
 run(`gcc -shared -fPIC -o libhello.so hello.c`)
 
-ccall((:hello, "./libhello.so"), Cvoid, (Cstring,), "NASA")
+ccall((:hello, "./libhello.so"), Cvoid, (Cstring,), "from Julia")
 
 ccall((:sqr, "./libhello.so"), Cdouble, (Cdouble,), sqrt(2))
+
+function use_outputarg()
+    x = Ref{Cint}()
+    ccall((:outputarg, "./libhello.so"), Cvoid, (Ref{Cint},), x)
+    return x[]
+end
+use_outputarg()
+@code_native use_outputarg()
 
 # ## Callbacks from C to Julia
 
@@ -34,6 +42,9 @@ function callback(p_a::Ptr{T}, p_b::Ptr{T})::Cint
 end
 
 p = [1.2, 3.4]
+
+# This is just a demo; try not to use `pointer` as it drops GC references!
+# Might need `GC.@preserve` to keep objects alive while in use by native code.
 
 p_a = pointer(p, 1)
 p_b = pointer(p, 2)
