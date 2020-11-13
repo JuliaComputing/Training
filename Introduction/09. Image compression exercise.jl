@@ -20,13 +20,14 @@ channelview(banana)
 channelview(banana)[:, end÷2 .+ (-10:10), end÷2 .+ (0:20)]
 
 # we can take apart and reassemble the red, green, and blue channels
-RGB.(red.(banana), green.(banana), blue.(banana))
+RGB.(red.(banana), (green.(banana).^2), blue.(banana))
 
 # The SVD factorizes a matrix A such that
 #     A == U * S * transpose(V)
 # where U and V are unitary, and S is diagonal.
 
-U, S, V = svd(grayvals)
+f = svd(grayvals)
+U, S, V = f
 
 norm(U * Diagonal(S) * V' - grayvals)
 
@@ -60,7 +61,13 @@ norm(U * Diagonal(S) * V' - grayvals)
 # - Read the documentation for `svd`.
 
 function compress_image(img, factor)
-    # your code here
+    G = Gray.(img)
+    X = channelview(G)
+    U, S, V = svd(X)
+    n = length(S)
+    m = ceil(Int, n/factor)
+    Y = U[:, 1:m] * Diagonal(S[1:m]) * V[:, 1:m]'
+    return Gray.(Y)
 end
 
 compress_image(banana, 2)
