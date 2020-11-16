@@ -52,8 +52,8 @@ function process_folder(dir)
         file, info = watch_folder(dir)
         path = joinpath(dir, file)
         if isfile(path)
-            print("processing $path...")
-            cp(path, joinpath("processed-results", file)) # Or actually do real work...
+            print("processing $path...\n")
+            cp(path, joinpath("processed-results", file), force=true) # Or actually do real work...
         end
     end
 end
@@ -90,7 +90,7 @@ rm("processed-results", recursive=true)
 #
 # How long will this take?
 
-@time for i in 1:10
+@time for i in 1:4
     sleep(1)
 end
 
@@ -102,7 +102,7 @@ end
 
 # And finally, this?
 
-@time @sync for i in 1:10
+@time @sync for i in 1:4
     @async sleep(1)
 end
 
@@ -151,8 +151,6 @@ fetch(t)
     Threads.@spawn work(100_000_000)
 end
 
-# The above is essentially the same as a `@threads for` loop!
-
 # # Key takeaways
 #
 # There is a lot more to tasks, but they form the foundation for reasoning about
@@ -163,5 +161,5 @@ end
 # * `@sync` waits for them to all complete
 # * We can reason about something that runs asynchronously and may return a value
 #   at some point in the future with `fetch`. Or we can just `wait` for it.
-# * `Threads.@spawn` is _exactly_ the same — but allows tasks to move between threads for 
+# * `Threads.@spawn` is _exactly_ the same — but allows tasks to run on any thread for
 #   real parallelism
