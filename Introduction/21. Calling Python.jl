@@ -1,3 +1,8 @@
+# Note: Use `ENV["PYTHON"] = "path of python executable"` to configure which python to use.
+# However, it is easiest to set `ENV["PYTHON"] = ""` and use the julia-installed python.
+# Run `]build PyCall` if you change this.
+# If you use `Conda.add`, it will only add packages to the julia-installed python environment.
+
 using PyCall
 using Conda
 
@@ -28,7 +33,6 @@ julia_fib.(1:10)
 
 using Profile
 @profile julia_fib(25)
-
 
 fib(x) = x < 2 ? 1 : fib(x-1) + fib(x-2)
 @time fib(25)
@@ -82,3 +86,30 @@ rosen(x0) == py"rosen"(x0)
 @time res = optimize(rosen, x0, NelderMead())
 
 @time opt.minimize(rosen, x0, method="nelder-mead")
+
+# ## Pandas
+
+# You can of course call Pandas just using PyCall, but Pandas.jl provides a
+# more convenient "julian" interface.
+
+using Pandas
+
+# call Pandas' CSV reader
+df = Pandas.read_csv("../DataScience/programminglanguages.csv")
+
+# can access columns with dot syntax
+df.year
+
+# use `values` to convert to a julia array with no copy (if possible)
+# in-place only possible for a few simple data types
+values(df.year)
+
+describe(df)
+
+# Pandas query expressions
+query(df, "year<1960")
+
+using DataFrames
+
+# convert to julia DataFrame --- note this copies data
+jdf = DataFrames.DataFrame(df)
