@@ -1,90 +1,104 @@
 # # A brief introduction to Tasks
 #
-# You're working on a computer that's doing _lots_ of things. It's managing
-# inputs, outputs, delegating control of the CPU between Julia and _all_ of
-# the other applications you have running. This wasn't always the case — does
-# anyone remember the days before you could just switch between applications?
+# A task in Julia is an independent call stack:
 #
-# It's not really doing all these things at once, but for the most part it
-# gives the _appearance_ of parallelism. We think about our computers as doing
-# _lots_ of things simultaneously — but it's not really simultaneous. It's just
-# switching between tasks so fast that it feels simultaneous.
+# - you can have multiple tasks that are all at different points of execution,
+#   all independent of each other
 #
-# This kind of task switching is perfect for situations like an operating system
-# where you're just waiting for user input most of the time. The OS multitasking
-# you're familiar with is called "preemptive" multitasking — the operating system
-# sits at the top and can arbitrarily control who gets to run when. Julia's task
-# system uses cooperative multitasking (also known as coroutines or green threads).
+# - you can transfer control from one task ("stack") to another and keep
+#   executing
+#
+# - you can transfer control back to the same task and keep going from where it
+#   was before with the same call stack
+#
+# Concurrency:
+#
+# - a given CPU core can only be executing one of these at a time
+#
+# - but different CPU cores can be executing different tasts at the same time
+#
+# Blocking:
+#
+# - all blocking operations like `sleep`, I/O, waiting on things appear to be
+#   blocking from the programmer's perspective
+#
+# - but none of these actually block under the hood
+#
+# - instead, they transfer control back to a scheduler task which keeps track of
+#   which work tasks are blocked or ready to run
+#
+# - if all tasks are blocked, the scheduler just waits until some event happens
+#   that allows some tasks to start working
+#
+# - when some tasks are ready to do work (i.e. CPU, not waiting), the scheduler
+#   starts one of them back up on each CPU core
 
-#%%
+# The simplest possible concurrent example:
 
-# Tasks work best when they're waiting for some _external_ condition to complete
-# their work. Let's say we had a directory "results" and wanted to process any
-# new files that appeared there:
+@time @sync begin
+    @async sleep(1)
+    @async sleep(1)
+end
 
-using FileWatching
-isdir("results") || mkdir("results")
-watch_folder("results", #= time out in seconds =# 5)
+# "Concurrency" vs "parallelism"
+#
+# concurrency: I don't care about the ordering of these they could run in any
+# order at the same time and you can do parts of one while the other is waiting
+#
+# parallelism: these actually run at the same on different CPU cores, getting
+# real work done, not just waiting
+#
+# When you use `@async` you're only expressing concurrency tasks will always run
+# on the same kernel thread
+#
+# Later, we'll see `Threads.@spawn` which starts a new task that can actually
+# run on a separate kernel thread
+#
+# Use `@async` when you have blocking tasks like I/O or waiting on some other
+# event and you want to do many of these at the same time.
+#
+# Use `Threads.@spawn` when you have actually CPU-bound work to do at the same
+# time on different kernel threads.
 
-# Julia happily will sit there and wait for something to happen... but it's
-# blocking anything else from happening while it's doing so! This is the perfect
-# case for a Task. We can say we want a given expression to run asynchronously
-# in a Task with the `@async` macro
+# The next simplest concurrent example...
 
-t = @async watch_folder("results") # no timeout means it will wait forever!
+using JSON
+using Downloads: download
 
-#%%
+function delay_request(id::Int)
+    url = "https://httpbingo.org/delay/2"
+    file = download("$url?id=$id")
+    data = JSON.parsefile(file)
+    parse(Int, data["args"]["id"][1])
+end
 
-import Base.Filesystem: touch, cp
-touch("results/0.txt")
-
-#%%
-
-file, info = fetch(t)
-file # |> process
-
-# We can even bundle this up into a repeating task:
-
-isdone = false
-function process_folder(dir)
-    !isdir("processed-results") && mkdir("processed-results")
-    while !isdone
-        file, info = watch_folder(dir)
-        path = joinpath(dir, file)
-        if isfile(path)
-            print("processing $path...\n")
-            cp(path, joinpath("processed-results", file), force=true) # Or actually do real work...
-        end
+@time @sync for id = 1:10
+    @async begin
+        println("REQ $id")
+        id′ = delay_request(id)
+        println("GOT $id′ [$id]")
     end
 end
 
-t = @async process_folder("results")
+# Note on `@sync`
+#
+# It's usually a good idea to wrap a set of async tasks in a `@sync` which will
+# wait for all of them to be done.
+#
+# However, sometimes you just want to spin off a "background" task that never
+# finishes or you don't care when it does. For this you can use `@async` without
+# `@sync`:
 
-#%%
+stop = false
+t = @async while !stop
+    println("💗")
+    sleep(1)
+end
 
-touch("results/1.txt")
-readdir("processed-results")
-
-#%%
-
-touch("results/2.txt")
-readdir("processed-results")
-
-#%%
-
-isdone = true
-touch("results/3.txt")
-readdir("processed-results")
-
-#%%
-
-touch("results/4.txt")
-readdir("processed-results")
-
-#%%
-
-rm("results", recursive=true)
-rm("processed-results", recursive=true)
+# Here we use the global `stop` to stop the task. This is fine here because
+# we're using tasks but not threads; if you're acessing anything global from
+# multiple threads, you have to be more careful and there are good tools for
+# this — atomics, locks, etc. — which we'll cover in the next sections
 
 # ## Quiz:
 #
@@ -96,13 +110,13 @@ end
 
 # What about this?
 
-@time for i in 1:10
+@time @sync for i in 1:4
     @async sleep(1)
 end
 
 # And finally, this?
 
-@time @sync for i in 1:4
+@time for i in 1:10
     @async sleep(1)
 end
 
@@ -124,42 +138,17 @@ work(1)
     @async work(100_000_000)
 end
 
-# # So what's happening here?
-#
-# `sleep` is nicely cooperating with our tasks
+## Fetching values from tasks
 
-methods(sleep)
-
-# # Fetching values from tasks
-
-# You can even fetch values from tasks
-
-t = @async (sleep(5); rand())
-
+t = @async (sleep(3); rand())
 wait(t)
 
+t = @async (sleep(3); rand())
 fetch(t)
 
-# # A return to multithreading
+# There's a lot more low level detail about tasks but this is all you need 99%
+# of the time:
 #
-# Tasks give the appearance of parallelism — and clearly denote areas that can be run
-# out-of-order. The exact same infrastucture can apply to true multithreading; in fact,
-# that's precisely how multithreading is built. Swap out `@async` for Threads.@spawn and
-# try the above example again:
-
-@time @sync for i in 1:10
-    Threads.@spawn work(100_000_000)
-end
-
-# # Key takeaways
+# - write what looks like blocking code in each task
 #
-# There is a lot more to tasks, but they form the foundation for reasoning about
-# actually _doing_ computation in parallel (and not just hoping that things will
-# cooperate for us to emulate parallelism by task switching).
-#
-# * `@async` creates and starts running a task
-# * `@sync` waits for them to all complete
-# * We can reason about something that runs asynchronously and may return a value
-#   at some point in the future with `fetch`. Or we can just `wait` for it.
-# * `Threads.@spawn` is _exactly_ the same — but allows tasks to run on any thread for
-#   real parallelism
+# - start multiple concurrent tasks with `@async`
