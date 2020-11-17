@@ -24,14 +24,13 @@
 #
 # - but none of these actually block under the hood
 #
-# - instead, they transfer control back to a scheduler task which keeps track of
-#   which work tasks are blocked or ready to run
+# - instead, they call a scheduler to pick another task to run
 #
 # - if all tasks are blocked, the scheduler just waits until some event happens
 #   that allows some tasks to start working
 #
-# - when some tasks are ready to do work (i.e. CPU, not waiting), the scheduler
-#   starts one of them back up on each CPU core
+# - when a task is ready to do work (i.e. CPU, not waiting), the scheduler
+#   starts it back up on an available CPU core
 
 # The simplest possible concurrent example:
 
@@ -42,17 +41,17 @@ end
 
 # "Concurrency" vs "parallelism"
 #
-# concurrency: I don't care about the ordering of these they could run in any
-# order at the same time and you can do parts of one while the other is waiting
+# concurrency: I don't care about the ordering of these; they could run in any
+# order or at the same time and you can do parts of one while the other is waiting
 #
-# parallelism: these actually run at the same on different CPU cores, getting
+# parallelism: these actually run at the same time on different CPU cores, getting
 # real work done, not just waiting
 #
-# When you use `@async` you're only expressing concurrency tasks will always run
-# on the same kernel thread
+# When you use `@async` you're only expressing concurrency; tasks will always run
+# on the same kernel thread.
 #
 # Later, we'll see `Threads.@spawn` which starts a new task that can actually
-# run on a separate kernel thread
+# run on a separate kernel thread.
 #
 # Use `@async` when you have blocking tasks like I/O or waiting on some other
 # event and you want to do many of these at the same time.
