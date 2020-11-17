@@ -25,7 +25,7 @@ def fib(x):
         return 1
     else:
         return $julia_fib(x-1) + $julia_fib(x-2)
-""" # """ # This is just a comment to fix syntax highlighting
+"""
 
 julia_fib.(1:10)
 

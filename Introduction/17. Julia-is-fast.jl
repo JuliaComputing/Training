@@ -97,7 +97,8 @@ open(`gcc -fPIC -O3 -msse3 -xc -shared -o $(Clib * "." * Libdl.dlext) -`, "w") d
 end
 
 ## define a Julia function that calls the C function:
-c_sum(X::Array{Float64}) = ccall(("c_sum", Clib), Float64, (Csize_t, Ptr{Float64}), length(X), X)
+c_sum(X::Array{Float64}) =
+    ccall(("c_sum", Clib), Float64, (Csize_t, Ptr{Float64}), length(X), X)
 
 #-
 
@@ -156,6 +157,8 @@ end
 c_sum_fastmath(X::Array{Float64}) = ccall(("c_sum", Clib_fastmath), Float64, (Csize_t, Ptr{Float64}), length(X), X)
 
 #-
+c_sum_fastmath(a) ≈ sum(a)
+c_sum_fastmath(a) - sum(a)
 
 c_fastmath_bench = @benchmark $c_sum_fastmath($a)
 
@@ -184,6 +187,7 @@ pysum(a)
 #-
 
 pysum(a) ≈ sum(a)
+pysum(a) - sum(a)
 
 #-
 
@@ -221,6 +225,7 @@ numpy_sum(a)
 #-
 
 numpy_sum(a) ≈ sum(a)
+numpy_sum(a) - sum(a)
 
 #-
 
@@ -274,7 +279,7 @@ d
 # # 7. Julia (hand-written)
 
 function mysum(A)
-    s = 0.0 # s = zero(eltype(a))
+    s = 0.0 # s = zero(eltype(A))
     for a in A
         s += a
     end

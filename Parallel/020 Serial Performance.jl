@@ -58,6 +58,7 @@ Profile.print(maxdepth=18, mincount=3)
 @profview for _ in 1:10000; findclosest(data, 0.5); end
 
 # Check out the flame graph version (requires plugin install)
+# - click on the little flame to the right of the search bar
 
 # ### Iterate!
 #
@@ -141,6 +142,7 @@ typeof(newdata)
 
 #%%
 
+@code_warntype findclosest2(data, 0.5)
 @code_warntype findclosest2(newdata, 0.5)
 
 # ### Type stability
@@ -155,7 +157,30 @@ typeof(newdata)
 # * Non-constant globals (they might change!)
 # * Functions that change what they return based on the _values_:
 
-#%%
+function bad_sum(v::Vector{Float64})
+    s = 0
+    for x in v
+        s += x
+    end
+    return s
+end    
+
+function good_sum(v::Vector{Float64})
+    s = 0.0
+    for x in v
+        s += x
+    end
+    return s
+end    
+
+function generic_sum(v::Vector{T}) where {T}
+    s = zero(T)
+    for x in v
+        s += x
+    end
+    return s
+end    
+
 
 # #### More on macros
 #
@@ -180,10 +205,12 @@ x = 0.5 # non-constant global
 # specialized machine code specifically for the given arguments.
 
 @code_llvm 1 + 2
+@code_native 1 + 2
 
 # This applies just the same to any functions we write — even the more complicated ones:
 
 @code_llvm debuginfo=:none findclosest2(Float32[2.2,3.4,4.5],Float32(3.2))
+@code_native debuginfo=:none findclosest2(Float32[2.2,3.4,4.5],Float32(3.2))
 
 # ## Modern hardware effects
 #
