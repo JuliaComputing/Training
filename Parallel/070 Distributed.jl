@@ -105,8 +105,11 @@ p - pi
 end
 p - pi
 
-# Why is this different from `@threads for` and `@simd for`? Why not just
-# `@distributed for`?  Why the `@distributed (+) for`?
+# Or, you can let `@distributed` divide the iteration space for you, like `@threads`:
+@time p = 4 * @distributed (+) for i in r
+    (isodd(i) ? -1 : 1) / (i*2+1)
+end
+p - pi
 
 #%%
 
@@ -233,15 +236,15 @@ fetch(@spawnat 2 mean(rand(100_000)))
 
 using SharedArrays
 function prefix!(⊕, y::SharedArray)
-    l=length(y)
-    k=ceil(Int, log2(l))
-    for j=1:k
-        @distributed for i=2^j:2^j:min(l, 2^k)       #"reduce"
+    l = length(y)
+    k = ceil(Int, log2(l))
+    for j in 1:k
+        @distributed for i in 2^j:2^j:min(l, 2^k)       #"reduce"
             @inbounds y[i] = y[i-2^(j-1)] ⊕ y[i]
         end
     end
-    for j=(k-1):-1:1
-        @distributed for i=3*2^(j-1):2^j:min(l, 2^k) #"expand"
+    for j in (k-1):-1:1
+        @distributed for i in 3*2^(j-1):2^j:min(l, 2^k) #"expand"
             @inbounds y[i] = y[i-2^(j-1)] ⊕ y[i]
         end
     end
@@ -252,7 +255,6 @@ A = SharedArray(data);
 
 #%%
 
-prefix!(+, copy(A)) # compile
 @time prefix!(+, A);
 
 #%%
@@ -262,15 +264,15 @@ A ≈ cumsum(data)
 # What went wrong?
 
 function prefix!(⊕, y::SharedArray)
-    l=length(y)
-    k=ceil(Int, log2(l))
-    for j=1:k
-        @sync @distributed for i=2^j:2^j:min(l, 2^k)       #"reduce"
+    l = length(y)
+    k = ceil(Int, log2(l))
+    for j in 1:k
+        @sync @distributed for i in 2^j:2^j:min(l, 2^k)       #"reduce"
             @inbounds y[i] = y[i-2^(j-1)] ⊕ y[i]
         end
     end
-    for j=(k-1):-1:1
-        @sync @distributed for i=3*2^(j-1):2^j:min(l, 2^k) #"expand"
+    for j in (k-1):-1:1
+        @sync @distributed for i in 3*2^(j-1):2^j:min(l, 2^k) #"expand"
             @inbounds y[i] = y[i-2^(j-1)] ⊕ y[i]
         end
     end
@@ -290,7 +292,6 @@ A ≈ cumsum(data)
 # headaches.
 
 @everywhere using Distributed
-using DistributedArrays
 @everywhere using DistributedArrays
 A = DArray(I->fill(myid(), length.(I)), (24, 24))
 
@@ -307,7 +308,6 @@ end
 # current data! While we've only talked about master-worker communcation so far,
 # workers can communicate directly amongst themselves, too (by default).
 
-using BenchmarkTools
 @everywhere using BenchmarkTools
 fetch(@spawnat 2 @benchmark $A[1,1])
 
@@ -363,7 +363,7 @@ end
 
 A = DArray(I->rand(Bool, length.(I)), (20,20))
 @everywhere using Colors
-Gray.(A)
+Gray.(Array(A))
 
 #%%
 
@@ -371,8 +371,7 @@ B = copy(A)
 
 #%%
 
-B = Gray.(life_step(B))
-B
+B = Gray.(Array(life_step(B)))
 #%%
 
 # ## Clusters and more ways to distribute
