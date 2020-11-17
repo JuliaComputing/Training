@@ -99,6 +99,33 @@ end
 # multiple threads, you have to be more careful and there are good tools for
 # this — atomics, locks, etc. — which we'll cover in the next sections
 
+# WARNING: if a task fails and no one waits for it, you may never get any
+# notification of there being any kind of problem
+
+t = @async (sleep(1); 1 + "hi")
+
+wait(ans)
+
+# Therefore, it's generally best practice in any production code to wrap all
+# `@async` calls in a `@sync` call or otherwise make sure all tasks are waited
+# on by some "parent" task
+
+## Fetching values from tasks
+
+t = @async (sleep(3); rand())
+wait(t)
+
+t = @async (sleep(3); rand())
+fetch(t)
+
+# There's a lot more low level detail about tasks but this is all you need 99%
+# of the time:
+#
+# - write what looks like blocking code in each task
+#
+# - start multiple concurrent tasks with `@async`
+
+
 # ## Quiz:
 #
 # How long will this take?
@@ -136,18 +163,3 @@ work(1)
 @time @sync for i in 1:10
     @async work(100_000_000)
 end
-
-## Fetching values from tasks
-
-t = @async (sleep(3); rand())
-wait(t)
-
-t = @async (sleep(3); rand())
-fetch(t)
-
-# There's a lot more low level detail about tasks but this is all you need 99%
-# of the time:
-#
-# - write what looks like blocking code in each task
-#
-# - start multiple concurrent tasks with `@async`
