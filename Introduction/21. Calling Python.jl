@@ -95,7 +95,8 @@ rosen(x0) == py"rosen"(x0)
 using Pandas
 
 # call Pandas' CSV reader
-df = Pandas.read_csv("../DataScience/programminglanguages.csv")
+pl_csv = normpath(@__DIR__, "../DataScience/data/programming_languages.csv")
+df = Pandas.read_csv("DataScience/data/programming_languages.csv")
 
 # can access columns with dot syntax
 df.year
