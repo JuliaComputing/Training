@@ -17,7 +17,8 @@ n = Hwloc.num_physical_cores()
 
 addprocs(n, exeflags=`--project=$@__DIR__`)
 nprocs()
-
+workers()
+procs()
 #%%
 
 myid()
@@ -91,7 +92,7 @@ futures = Array{Future}(undef, nworkers())
 @time begin
     for (i, id) in enumerate(workers())
         batch = 0:length(r)÷nworkers()-1
-        futures[i] = @spawnat id partial_pi(batch .+ (i-1)*(length(r)÷nworkers()))
+        futures[i] = Distributed.@spawn partial_pi(batch .+ (i-1)*(length(r)÷nworkers()))
     end
     p = sum(fetch.(futures))
 end

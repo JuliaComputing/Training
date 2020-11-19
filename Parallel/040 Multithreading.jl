@@ -79,6 +79,11 @@ A
 end
 A
 
+l = ReentrantLock()
+lock(l) do
+    ...
+end
+
 # So let's try implementing our first simple threaded algorithm — `sum`:
 
 function threaded_sum1(A)

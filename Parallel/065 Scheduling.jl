@@ -3,8 +3,14 @@
 # Here we will compare two approaches to parallelizing a loop:
 # `@threads` and `@sync - @spawn`.
 
+# Note: use `julia -t 4` to start julia with 4 threads from the command line.
+# In VSCode, go to File > Preferences > Settings and search for julia.
+# Open settings.json.
+
+Threads.nthreads()
+
 using Images, Statistics
-import Base.Threads: @threads, @spawn
+using Base.Threads: @threads, @spawn
 
 # The Mandelbrot set escape time function
 function escapetime(z; maxiter=80)
@@ -35,17 +41,19 @@ function mandel(; width=80, height=20, maxiter=80)
     return out
 end
 
-# Note: use `julia -t 4` to start julia with 4 threads from the command line.
-# In VSCode, go to File > Preferences > Settings and search for julia.
-# Open settings.json.
-
-Threads.nthreads()
-
 mandel()
 
 @time m = mandel(width=1200,height=900,maxiter=400)
 img = Gray.((m.%400)./100)
 # save("img.png", clamp.(img, 0, 1))
+
+# With @threads:
+# 1 thread: 1.9
+# 4 threads: 0.9 ~ 1.5
+
+# With @spawn:
+# 4 threads: 0.5 ~ 0.6
+# 4 threads, @spawn each element: 1.9
 
 # With @threads:
 # 1 Thread : 1.656
