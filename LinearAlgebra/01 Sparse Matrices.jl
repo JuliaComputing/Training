@@ -10,8 +10,8 @@
 #  - Eigen- and singular values
 
 # Basics
-# Sparse arrays allow for working with very very large matrices provded that
-# they are sparse, i.e. contain mostly zeros. Internally, only the non-zeros
+# Sparse arrays data structures allow for working with very large matrices provided 
+# that they are "sparse", i.e. contain mostly zeros. Internally, only the non-zeros
 # and their indices are stored. This is in contrast to dense array strucutues
 # where the indices are implicit.
 #
@@ -75,7 +75,7 @@ nnz(A2)/length(A2)
 ############
 # There are many different types of sparse matrices but many of them fall into
 # two main groups: one where the matrix represents
-# a discretization of differential equations and one where the matrix represents
+# a discretization of a differential equation and one where the matrix represents
 # a data graph. The distribution of the non-zeros are very different in the two groups
 
 # The best collection of sparse matrices can be found at
@@ -137,7 +137,7 @@ sparse([1 0; 0 0])*[NaN, NaN]
 # ...but still
 [1 0; 0 0]*NaN 
 
-# It's possible to store zeros as a non-zero
+# It's possible to store a zero as a non-zero
 AI = sparse(1.0I, 3, 3)
 dump(AI)
 
@@ -146,14 +146,14 @@ AI[1, 1] = 0; AI
 nnz(AI)
 count(!iszero, AI)
 
-# ... you can explicitly ask that they stored zeros are dropped
+# ... you can explicitly ask that the stored zeros are dropped
 dropzeros!(AI)
 nnz(AI)
 
 ##################
 # Linear algebra #
 ##################
-# One of the major applications of sparse matrices is solving large linear systems (\)-like
+# One of the major applications of sparse matrices is solving large linear systems, (\)-like
 # Two approches: direct or iterative
 
 # The direct solver: SuiteSparse which is included as a standard library
@@ -180,7 +180,7 @@ Asparse\b ≈ Adense\b
 # ...so sparse solvers are not necessarily faster but allows for solving larger problems
 
 # Factorizations
-# cholesky for positive definite sparse matrices
+# `cholesky` for positive definite sparse matrices
 
 Adense = [  1  1/3    0
           1/3    1  1/2
@@ -197,17 +197,18 @@ Fdense\b ≈ Fsparse\b
 # ...almost...
 Fdense.L\b ≈ Fsparse.L\b
 
-# ...the sparse factorization uses pivoting to reduce fill-in during the factorization
+# ...so check the docstring. The sparse factorization uses pivoting to reduce fill-in
+# during the factorization
 Fsparse.p
 
-# so when working with the factor directly, the `PtL` version is often preferred
+# when working with the factor directly, the `PtL` version is often preferred
 Fsparse.PtL\b ≈ Fsparse.L\b[Fsparse.p]
 
-# ... so the factorization is actually P*A*P' = L*L'
+# ... the factorization is actually P*A*P' = L*L'
 
 # For cholesky (and ldlt) the pivoting (P) only depends on the non-zero pattern
 
-# ldlt for symmetric sparse matrices in general
+# `ldlt` for symmetric sparse matrices in general
 A = sparse(
     [ -1 1/2 1/4
      1/2   1 1/2
@@ -215,18 +216,18 @@ A = sparse(
 
 F = cholesky(A) # fails
 
-# ...it's possible to use the cholesky to test for (numerical positive definiteness)
+# ...it's possible to use the Cholesky to test for (numerical positive definiteness)
 F = cholesky(A, check=false)
 issuccess(F)
 
 # ... for indefinite matrices, we can use ldlt
 Fldlt = ldlt(A)
 
-# ... but not it might still fail if it hits a zero pivot
+# ... but it might still fail if it hits a zero pivot
 A[1, 1] = 0
 ldlt(A)
 
-# lu for general sparse matrices
+# `lu` for general sparse matrices
 # the error message suggested that we try the LU
 Flu = lu(A)
 
@@ -238,7 +239,7 @@ Flu.q
 Flu.Rs
 Flu.L*Flu.U ≈ (Flu.Rs .* A)[Flu.p, Flu.q]
 
-# qr for sparse QR.
+# `qr` for sparse QR.
 # The sparse QR is used useful for solving large least squares problems
 A = sprandn(100000, 10, 0.001);
 b = A*ones(size(A, 2)) + randn(size(A, 1));
@@ -257,7 +258,6 @@ A\b == F\b
 using IterativeSolvers
 
 # Plate-fin heat exchanger (medium case) (DAE) David.Averous@ensigct.fr
-
 A_epb2 = matrixdepot("Averous/epb2")
 
 b = ones(size(A_epb2, 1))
@@ -265,14 +265,15 @@ b = ones(size(A_epb2, 1))
 # direct
 @time x_lu = lu(A_epb2)\b;
 
-# iterative
+# iterative (Biconjugate gradient stabilized method)
+# See https://en.wikipedia.org/wiki/Biconjugate_gradient_stabilized_method
 @time x_iter = bicgstabl(A_epb2, b);
 
 # Iterative solvers can handle much larger problems but often requires good preconditioners
 # for reasonable performance. We won't go into details here.
 
 # Eigen- and singular values
-# Computing all eigen- or singular values of a sparse matrix is generall too expensive.
+# Computing all eigen- or singular values of a sparse matrix is generally too expensive.
 # However, in many applications it is sufficient to know something about the largest or
 # smallest values. Again, many implementations are available. From the traditional Arpack
 # to new Julia implementations in e.g. TSVD and KrylovKit
@@ -282,4 +283,3 @@ Fsvd[2]
 
 Feig = eigsolve(A_epb2, 5)
 Feig[1]
-

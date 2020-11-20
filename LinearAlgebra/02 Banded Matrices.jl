@@ -1,6 +1,6 @@
 # Banded and block-banded matrices
 
-# What is banded matrix? A matrix `B` is banded with lower band `kl` and
+# What is a banded matrix? A matrix `B` is banded with lower band `kl` and
 # upper band `ku` when i > j + ku or j > i + ku => b[i,j] == 0.
 
 # An example of a banded matrix
@@ -17,8 +17,8 @@ A1 = diagm(-1 => -ones(5), 0 => 2*ones(6), 1 => -ones(5))
 # efficient memory access.
 #
 # Like linear algebra routines for standard matrices, routines for banded matrices are
-# available in LAPACK but these are not available as a standard library in Julia. Instead,
-# they are made available in Sheehan Olver's BandedMatrices package
+# available in LAPACK but these routines are not available as a standard library in Julia.
+# Instead, they are made available in Sheehan Olver's BandedMatrices package
 using BandedMatrices, LinearAlgebra
 
 # We can construct the equivalent of `A` but stored as a BandedMatrix and compare the size
@@ -45,7 +45,8 @@ b = A2*ones(size(A2, 1))
 @time B2\b; # Banded
 @time C2\b; # Sparse
 
-# Because of the predictability of the non-zeros, the solve is much faster than the sparse solve
+# Because of the predictability of the non-zeros, the solution is computed much faster than the
+# sparse solution
 
 # Banded matrices naturally occur when discretizing partial differential equations. For a 1D problem
 # the band size depends on the order of the derivative approximation used in the discretiztion.
@@ -56,7 +57,7 @@ b = A2*ones(size(A2, 1))
 # Temporal freq domain seismic modeling; J. Washbourne, Chevron
 A_chevron = matrixdepot("Chevron/Chevron2")
 
-# use abs since the values are complex
+# use abs in the spy plot since the values are complex
 spy(abs.(A_chevron))
 
 # Visual inspection of the matrix reveals that is built up of 201x201 matrices. Here is one
@@ -68,26 +69,29 @@ size(A_chevron, 1)/201
 
 # There are one upper and one lower block diagonal and each of them has three diagonals so it
 # is a 2D 9 point stencil calculation. The expected number of nonzeros is roughly
-size(A_chevron, 1) |> n -> 3*n + 2*3*(n - isqrt(n))
+size(A_chevron, 1) |> n -> 3*n + 2*3*(n - 201)
 # ...compare
 nnz(A_chevron)
 # ...so it looks about right
 
-# An alternative representation of a problem like this is block-banded matrices. In a block
-# matrix each element is itself a matrix. A block-banded matrix is a banded matrix where each
-# element is matrix. The block elements can have generally have any structure. In this case,
-# they will again be banded. The BandedBlockMatrices package (also written by Sheehan Olver)
-# has support for this strucure.
+# An alternative representation of a problem like this is a block-banded matrix structure.
+# In a block matrix, each element is itself a matrix. A block-banded matrix is a banded
+# matrix where each element is a matrix. The block elements can generally have any structure.
+# In our example, they will again be banded. The BandedBlockMatrices package (also written by
+# Sheehan Olver) has support for this structure.
 using BlockBandedMatrices
 
-# The BlockBandedMatrix struct allows for arbitrary matrices as the elements whereas
-# BlockBandedBlockMatrix is optimized for a case like ours
+# The BlockBandedMatrix structure allows for arbitrary matrices as the elements whereas
+# BlockBandedBlockMatrix is optimized for a case like the Chevron matrix
 
+# Let us first build a small version to see how it looks like
 BandedBlockBandedMatrix{Complex{Float64}}(I, [2, 2, 2], [2, 2, 2], (1, 1), (1, 1))
 
+# Now, we build a BandedBlockBandedMatrix version of the Chevron matrix
+# first we create the structure (notice that based on reading the doct, it looks like the constructor are under development)
 BBB_chevron = BandedBlockBandedMatrix{Complex{Float64}}(I, fill(201, 449), fill(201, 449), (1, 1), (1, 1))
 
-# A little tedious to construct
+# ...and then we populate it
 for j in 1:449
     for _i in -1:1
         i = j + _i
@@ -98,14 +102,15 @@ for j in 1:449
     end
 end
 
+# let us print it
 BBB_chevron
 
 # check that it matches A_chevron
 sparse(BBB_chevron) == A_chevron
 
+# how large are they?
 Base.summarysize(A_chevron)/1000^2 # MB
 Base.summarysize(BBB_chevron)/1000^2 # MB
-
 
 # How does it perform
 b = ones(eltype(A_chevron), size(BBB_chevron, 1))
@@ -116,5 +121,5 @@ b = ones(eltype(A_chevron), size(BBB_chevron, 1))
 @time BBB_chevron*b;
 
 # Much work has gone into optimizing sparse matrix operations. While the BBB
-# structure is more efficient in theory, the implementations have received
+# structure is more efficient, in theory, the implementations have received
 # fewer man hours.
