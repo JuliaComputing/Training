@@ -1,0 +1,10 @@
+[deps]
+BandedMatrices = "aae01518-5342-5314-be14-df237901396f"
+BlockBandedMatrices = "ffab5731-97b5-5995-9138-79e8c1846df0"
+IterativeSolvers = "42fd0dbc-a981-5370-80f2-aaf504508153"
+KrylovKit = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
+MatrixDepot = "b51810bb-c9f3-55da-ae3c-350fc1fbce05"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+SuiteSparse = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
+TSVD = "9449cd9e-2762-5aa3-a617-5413e99d722e"
+UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
