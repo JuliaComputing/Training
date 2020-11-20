@@ -12,7 +12,11 @@
 # Basics
 # Sparse arrays allow for working with very very large matrices provded that
 # they are sparse, i.e. contain mostly zeros. Internally, only the non-zeros
-# and their indices are stored.
+# and their indices are stored. This is in contrast to dense array strucutues
+# where the indices are implicit.
+#
+# Pro: More memory efficient and lower algorithmic complexity
+# Cons: More expensive index calculations and storage requirement for indices
 #
 # There exists several sparse array types. Julia's default sparse array type
 # is using the compressed sparse column (CSC) format.
