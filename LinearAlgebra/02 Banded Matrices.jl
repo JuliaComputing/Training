@@ -38,6 +38,7 @@ C2 = sparse(B2)
 
 Base.summarysize(A2)/1000^3 # in GB
 Base.summarysize(B2)/1000^2 # in MB
+Base.summarysize(C2)/1000^2 # in MB
 
 b = A2*ones(size(A2, 1))
 

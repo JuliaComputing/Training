@@ -58,7 +58,7 @@ spdiagm(-1 => fill(-1.0, 9), 0 => fill(2.0, 10), 1 => fill(1.0, 9))
 blockdiag(sprandn(1000, 1000, 0.01), sprandn(1000, 1000, 0.01))
 
 # Convenience functions when working with sparse matrices
-# The reverse of the i,j constructor  is called findnz
+# The reverse of the i, j, v constructor  is called findnz
 findnz(A2)
 
 # and can be very handy
@@ -66,7 +66,7 @@ findnz(A2)
 # of a sparse matrix and how expensize operations on it might be
 nnz(A2)
 
-# ...the faction of non-zeros can interest
+# ...the fraction of non-zeros can interest
 nnz(A2)/length(A2)
 
 
@@ -129,6 +129,7 @@ inv(A0 + I)
 # Array wrappers can hide the sparse structure and cause dispatch to slow fallbacks
 @time sum(A0)
 @time sum(A0')
+@time sum(copy(A0'))
 
 # Corners of floating point arithmetic behaves differently
 [1 0; 0 0]*[NaN, NaN]
