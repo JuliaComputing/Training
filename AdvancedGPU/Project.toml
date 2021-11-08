@@ -1,0 +1,13 @@
+[deps]
+Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+CUDAKernels = "72cfdca4-0801-4ab0-bf6a-d52aa10adc57"
+ColorTypes = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
+FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
+GPUCompiler = "61eb1bfa-7361-4325-ad38-22787b887f55"
+ImageIO = "82e4d734-157c-48bb-816b-45c225c6df19"
+Images = "916415d5-f1e6-5110-898d-aaa5f9f070e0"
+KernelAbstractions = "63c18a36-062a-441e-b654-da1e3ab1ce7c"
+TestImages = "5e47fb64-e119-507b-a336-dd2b206d9990"
+Tullio = "bc48ee85-29a4-5162-ae0b-a64e1601d4bc"
